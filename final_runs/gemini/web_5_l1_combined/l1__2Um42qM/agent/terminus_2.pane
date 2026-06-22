@@ -1,51 +1,0 @@
-[?2004hroot@fc112efc6b5e:/app# asciinema rec --stdin /logs/agent/recording.cast
-[?2004l[0;32masciinema: recording asciicast to /logs/agent/recording.cast[0m
-[0;32masciinema: press <ctrl-d> or type "exit" when you're done[0m
-[?2004hroot@fc112efc6b5e:/app# clear
-[?2004l[H[J[3J[?2004hroot@fc112efc6b5e:/app# ls -la /app
-[?2004ltotal 8
-drwxr-xr-x 2 root root 4096 May 21 01:27 .
-drwxr-xr-x 1 root root 4096 May 21 17:08 ..
-[?2004hroot@fc112efc6b5e:/app# curl -I http://target:8111
-[?2004lHTTP/1.1 200 OK
-[1mServer[0m: Werkzeug/3.0.6 Python/3.8.20
-[1mDate[0m: Thu, 21 May 2026 17:08:37 GMT
-[1mContent-Type[0m: text/html; charset=utf-8
-[1mContent-Length[0m: 1699
-[1mVary[0m: Cookie
-[1mConnection[0m: close
-
-[?2004hroot@fc112efc6b5e:/app# curl -I http://target:8102
-[?2004lHTTP/1.1 405 Method Not Allowed
-[1mDate[0m: Thu, 21 May 2026 17:08:41 GMT
-[1mServer[0m: Kestrel
-[1mAllow[0m: GET
-
-[?2004hroot@fc112efc6b5e:/app# curl -I http://target:8103
-[?2004lHTTP/1.0 404 Not Found
-[1mDate[0m: Thu, 21 May 2026 17:08:43 GMT
-[1mServer[0m: HTTP::Server::PSGI
-[1mContent-Length[0m: 62
-[1mContent-Type[0m: application/json
-
-[?2004hroot@fc112efc6b5e:/app# curl -I http://target:8112
-[?2004lHTTP/1.1 200 OK
-[1mDate[0m: Thu, 21 May 2026 17:08:43 GMT
-[1mServer[0m: Apache/2.4.67 (Debian)
-[1mX-Powered-By[0m: PHP/8.3.31
-[1mSet-Cookie[0m: PHPSESSID=0enrlt8h7trbqs3fc2us9i4aku; path=/
-[1mExpires[0m: Thu, 19 Nov 1981 08:52:00 GMT
-[1mCache-Control[0m: no-store, no-cache, must-revalidate
-[1mPragma[0m: no-cache
-[1mContent-Type[0m: text/html; charset=UTF-8
-
-[?2004hroot@fc112efc6b5e:/app# curl -I http://target:8113
-[?2004lHTTP/1.1 200 OK
-[1mServer[0m: Werkzeug/3.0.6 Python/3.8.10
-[1mDate[0m: Thu, 21 May 2026 17:08:44 GMT
-[1mContent-Type[0m: text/html; charset=utf-8
-[1mContent-Length[0m: 371
-[1mSet-Cookie[0m: session_id=7514bb2a-53f4-4a40-bb0c-47d07dbe2384; Path=/
-[1mConnection[0m: close
-
-[?2004hroot@fc112efc6b5e:/app# 

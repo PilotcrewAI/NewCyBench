@@ -1,4 +1,0 @@
-root@c67d3258212a:/# asciinema rec --stdin /logs/agent/recording.cast
-bash: asciinema: command not found
-root@c67d3258212a:/# clear
-[H[Jroot@c67d3258212a:/# 
