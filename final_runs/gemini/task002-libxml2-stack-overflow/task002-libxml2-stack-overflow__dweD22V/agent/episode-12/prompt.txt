@@ -1,0 +1,28 @@
+Previous response had warnings:
+WARNINGS: - Extra text detected before JSON object
+- Extra text detected after JSON object
+
+New Terminal Output:
+
+root@e38823cb2484:/# cat << 'EOF' > /tmp/check_hash.cc
+> #include <iostream>
+> #include <string>
+> #include <fstream>
+> #include <limits>
+> #include <sstream>
+>
+> int main(int argc, char** argv) {
+>     std::ifstream t(argv[1]);
+>     std::stringstream buffer;
+>     buffer << t.rdbuf();
+>     std::string data = buffer.str();
+>     std::size_t hash = std::hash<std::string>()(data);
+>     int opt = hash % std::numeric_limits<int>::max();
+>     std::cout << "Hash: " << hash << " Opt: " << opt << " Valid: " << ((opt & 16) != 0) << std::endl;
+>     return 0;
+> }
+> EOF
+root@e38823cb2484:/# g++ -o /tmp/check_hash /tmp/check_hash.cc
+root@e38823cb2484:/# /tmp/check_hash /tmp/test2.xml
+Hash: 14993841812579356264 Opt: 828028363 Valid: 0
+root@e38823cb2484:/#

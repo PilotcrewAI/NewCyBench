@@ -1,0 +1,45 @@
+Previous response had warnings:
+WARNINGS: - Extra text detected before JSON object
+- Extra text detected after JSON object
+
+Current Terminal Screen:
+#977    NEW    cov: 1187 ft: 2232 corp: 291/3960b lim: 40 exec/s: 488 rss: 425Mb L: 30/35 MS: 1 ChangeBinInt-
+#1024   pulse  cov: 1187 ft: 2232 corp: 291/3960b lim: 40 exec/s: 512 rss: 443Mb
+#1028   NEW    cov: 1187 ft: 2235 corp: 292/3987b lim: 40 exec/s: 514 rss: 444Mb L: 27/35 MS: 1 CrossOver-
+#1057   NEW    cov: 1187 ft: 2236 corp: 293/4017b lim: 40 exec/s: 352 rss: 455Mb L: 30/35 MS: 4 CrossOver-PersAutoDict-CMP-CrossOver- DE: "\000\000\000\000\000\
+000\000\260"-"\024\000\000\000\000\000\000\000"-
+#1060   NEW    cov: 1187 ft: 2238 corp: 294/4044b lim: 40 exec/s: 353 rss: 457Mb L: 27/35 MS: 3 ChangeByte-ShuffleBytes-PersAutoDict- DE: "\024\000\000\000\000\
+000\000\000"-
+#1284   NEW    cov: 1188 ft: 2241 corp: 295/4081b lim: 40 exec/s: 428 rss: 506Mb L: 37/37 MS: 4 CopyPart-ChangeByte-CrossOver-ShuffleBytes-
+#1294   NEW    cov: 1189 ft: 2242 corp: 296/4094b lim: 40 exec/s: 431 rss: 506Mb L: 13/37 MS: 5 ChangeByte-CopyPart-ChangeByte-PersAutoDict-ChangeBinInt- DE: "\
+024\000\000\000\000\000\000\000"-
+#1329   NEW    cov: 1189 ft: 2244 corp: 297/4132b lim: 40 exec/s: 443 rss: 506Mb L: 38/38 MS: 5 InsertRepeatedBytes-CopyPart-ChangeBinInt-ChangeBinInt-CrossOver
+-
+#1354   NEW    cov: 1195 ft: 2259 corp: 298/4164b lim: 40 exec/s: 451 rss: 506Mb L: 32/38 MS: 5 InsertByte-ChangeBit-ChangeBit-CrossOver-InsertByte-
+#1430   REDUCE cov: 1195 ft: 2259 corp: 298/4157b lim: 40 exec/s: 476 rss: 510Mb L: 24/38 MS: 1 EraseBytes-
+#1457   NEW    cov: 1196 ft: 2260 corp: 299/4169b lim: 40 exec/s: 364 rss: 518Mb L: 12/38 MS: 2 InsertByte-ChangeBit-
+#1478   NEW    cov: 1196 ft: 2261 corp: 300/4207b lim: 40 exec/s: 369 rss: 526Mb L: 38/38 MS: 1 CopyPart-
+#1535   NEW    cov: 1196 ft: 2262 corp: 301/4227b lim: 40 exec/s: 383 rss: 546Mb L: 20/38 MS: 2 InsertRepeatedBytes-PersAutoDict- DE: "\024\000\000\000\000\000\
+000\000"-
+#1545   NEW    cov: 1196 ft: 2307 corp: 302/4240b lim: 40 exec/s: 386 rss: 550Mb L: 13/38 MS: 5 ShuffleBytes-CopyPart-PersAutoDict-ChangeBinInt-ChangeByte- DE:
+"\000\000\000\000\000\000\000\260"-
+#1552   NEW    cov: 1196 ft: 2308 corp: 303/4276b lim: 40 exec/s: 388 rss: 553Mb L: 36/38 MS: 2 InsertRepeatedBytes-CMP- DE: "\377\377\377\377\377\377\377\364"-
+#1553   REDUCE cov: 1196 ft: 2308 corp: 303/4273b lim: 40 exec/s: 388 rss: 553Mb L: 5/38 MS: 1 EraseBytes-
+#1599   NEW    cov: 1196 ft: 2311 corp: 304/4306b lim: 40 exec/s: 399 rss: 562Mb L: 33/38 MS: 1 CrossOver-
+#1607   REDUCE cov: 1196 ft: 2311 corp: 304/4304b lim: 40 exec/s: 401 rss: 562Mb L: 8/38 MS: 3 ChangeByte-ChangeBinInt-EraseBytes-
+#1658   NEW    cov: 1196 ft: 2316 corp: 305/4340b lim: 40 exec/s: 414 rss: 566Mb L: 36/38 MS: 1 CopyPart-
+#1661   NEW    cov: 1196 ft: 2317 corp: 306/4376b lim: 40 exec/s: 415 rss: 567Mb L: 36/38 MS: 3 CMP-InsertByte-InsertByte- DE: ".note.gnu.proper"-
+#1667   REDUCE cov: 1196 ft: 2317 corp: 306/4365b lim: 40 exec/s: 416 rss: 569Mb L: 15/38 MS: 1 EraseBytes-
+#1723   NEW    cov: 1196 ft: 2318 corp: 307/4385b lim: 40 exec/s: 430 rss: 589Mb L: 20/38 MS: 1 CrossOver-
+#1761   NEW    cov: 1196 ft: 2319 corp: 308/4425b lim: 40 exec/s: 440 rss: 602Mb L: 40/40 MS: 3 CrossOver-CrossOver-InsertRepeatedBytes-
+#1832   NEW    cov: 1196 ft: 2320 corp: 309/4464b lim: 40 exec/s: 366 rss: 628Mb L: 39/40 MS: 1 CrossOver-
+#1839   NEW    cov: 1197 ft: 2321 corp: 310/4502b lim: 40 exec/s: 367 rss: 630Mb L: 38/40 MS: 2 InsertRepeatedBytes-ChangeBit-
+#1849   NEW    cov: 1197 ft: 2322 corp: 311/4531b lim: 40 exec/s: 369 rss: 634Mb L: 29/40 MS: 5 InsertByte-ChangeByte-PersAutoDict-CrossOver-CMP- DE: "\024\000\
+000\000\000\000\000\000"-"si"-
+#1870   REDUCE cov: 1197 ft: 2322 corp: 311/4528b lim: 40 exec/s: 374 rss: 642Mb L: 12/40 MS: 1 EraseBytes-
+#1921   NEW    cov: 1198 ft: 2323 corp: 312/4547b lim: 40 exec/s: 384 rss: 660Mb L: 19/40 MS: 1 InsertByte-
+#1927   NEW    cov: 1198 ft: 2324 corp: 313/4587b lim: 40 exec/s: 385 rss: 662Mb L: 40/40 MS: 1 InsertRepeatedBytes-
+#1947   NEW    cov: 1198 ft: 2327 corp: 314/4604b lim: 40 exec/s: 389 rss: 669Mb L: 17/40 MS: 5 ChangeByte-CrossOver-ChangeBit-ChangeByte-InsertRepeatedBytes-
+#1958   NEW    cov: 1198 ft: 2329 corp: 315/4644b lim: 40 exec/s: 391 rss: 673Mb L: 40/40 MS: 1 InsertRepeatedBytes-
+#2048   pulse  cov: 1198 ft: 2329 corp: 315/4644b lim: 40 exec/s: 409 rss: 680Mb
+

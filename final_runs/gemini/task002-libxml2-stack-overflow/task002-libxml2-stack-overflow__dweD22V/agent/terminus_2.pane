@@ -1,0 +1,850 @@
+root@e38823cb2484:/# asciinema rec --stdin /logs/agent/recording.cast
+bash: asciinema: command not found
+root@e38823cb2484:/# clear
+[H[Jroot@e38823cb2484:/# cat << 'EOF' > /tmp/gen.py
+> depth = 3000
+> dtd = '<!ELEMENT root '
+> dtd += '(a|' * depth
+> dtd += 'a'
+> dtd += ')' * depth
+> dtd += '>'
+> xml = f'<!DOCTYPE root [\n{dtd}\n]>\n<root/>'
+> with open('/tmp/test.xml', 'w') as f:
+>     f.write(xml)
+> EOF
+root@e38823cb2484:/# python3 /tmp/gen.py
+root@e38823cb2484:/# /out/libxml2_xml_read_memory_fuzzer /tmp/test.xml > /tmp/crash_output.txt 2>&1
+root@e38823cb2484:/# grep AddressSanitizer /tmp/crash_output.txt
+root@e38823cb2484:/# cat /tmp/crash_output.txt
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 352780597
+INFO: Loaded 1 modules   (56424 inline 8-bit counters): 56424 [0xb4d310, 0xb5af78), 
+INFO: Loaded 1 PC tables (56424 PCs): 56424 [0x9b68e0,0xa92f60), 
+/out/libxml2_xml_read_memory_fuzzer: Running 1 inputs 1 time(s) each.
+Running: /tmp/test.xml
+Executed /tmp/test.xml in 9 ms
+***
+*** NOTE: fuzzing was not performed, you have only
+***       executed the target code on a fixed set of inputs.
+***
+root@e38823cb2484:/# cat << 'EOF' > /tmp/gen2.py
+> # The function serializes content models like (a,b,c)
+> # We want a depth/length combination that causes strcat to exceed 5000 bytes.
+> # Let's try deep nesting: (a|(a|(a|...)))
+> s = 'a'
+> for i in range(2000):
+>     s = f'(a|{s})'
+> xml = f'<!DOCTYPE root [\n<!ELEMENT root {s}>\n]>\n<root><b/></root>'
+> with open('/tmp/test2.xml', 'w') as f:
+>     f.write(xml)
+> EOF
+root@e38823cb2484:/# python3 /tmp/gen2.py
+root@e38823cb2484:/# /out/libxml2_xml_read_memory_fuzzer /tmp/test2.xml > /tmp/crash_output.txt 2>&1
+root@e38823cb2484:/# cat /tmp/crash_output.txt
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 371379124
+INFO: Loaded 1 modules   (56424 inline 8-bit counters): 56424 [0xb4d310, 0xb5af78), 
+INFO: Loaded 1 PC tables (56424 PCs): 56424 [0x9b68e0,0xa92f60), 
+/out/libxml2_xml_read_memory_fuzzer: Running 1 inputs 1 time(s) each.
+Running: /tmp/test2.xml
+Executed /tmp/test2.xml in 9 ms
+***
+*** NOTE: fuzzing was not performed, you have only
+***       executed the target code on a fixed set of inputs.
+***
+root@e38823cb2484:/# ls -la /out /src / | grep -i libxml
+-rwxr-xr-x. 1 1011 1011 12236824 May  1  2024 [01;31m[Klibxml[m[K2_xml_read_memory_fuzzer
+-rw-r--r--. 1 1011 1011       28 May  1  2024 [01;31m[Klibxml[m[K2_xml_read_memory_fuzzer.options
+-rwxr-xr-x. 1 1011 1011 12228840 May  1  2024 [01;31m[Klibxml[m[K2_xml_regexp_compile_fuzzer
+-rw-r--r--. 1 1011 1011       28 May  1  2024 [01;31m[Klibxml[m[K2_xml_regexp_compile_fuzzer.options
+drwxr-xr-x. 1 root root 16384 May  1  2024 [01;31m[Klibxml[m[K2
+-rw-rw-r--. 1 root root  1387 May  1  2024 [01;31m[Klibxml[m[K2_xml_read_memory_fuzzer.cc
+-rw-rw-r--. 1 root root    28 May  1  2024 [01;31m[Klibxml[m[K2_xml_read_memory_fuzzer.options
+-rw-rw-r--. 1 root root   814 May  1  2024 [01;31m[Klibxml[m[K2_xml_regexp_compile_fuzzer.cc
+-rw-rw-r--. 1 root root    28 May  1  2024 [01;31m[Klibxml[m[K2_xml_regexp_compile_fuzzer.options
+root@e38823cb2484:/# find / -type l -name "valid.c" 2>/dev/null; find / -name "valid.c" 2>/dev/null
+/src/libxml2/valid.c
+root@e38823cb2484:/# cat /src/libxml2_xml_read_memory_fuzzer.cc
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#include <cassert>
+#include <cstddef>
+#include <cstdint>
+
+#include <functional>
+#include <limits>
+#include <string>
+
+#include "libxml/parser.h"
+#include "libxml/xmlsave.h"
+
+void ignore (void* ctx, const char* msg, ...) {
+  // Error handler to avoid spam of error messages from libxml parser.
+}
+
+extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
+  xmlSetGenericErrorFunc(NULL, &ignore);
+
+  // Test default empty options value and some random combination.
+  std::string data_string(reinterpret_cast<const char*>(data), size);
+  const std::size_t data_hash = std::hash<std::string>()(data_string);
+  const int max_option_value = std::numeric_limits<int>::max();
+  const int random_option_value = data_hash % max_option_value;
+  const int options[] = {0, random_option_value};
+
+  for (const auto option_value : options) {
+    if (auto doc = xmlReadMemory(data_string.c_str(), data_string.length(),
+                                 "noname.xml", NULL, option_value)) {
+      auto buf = xmlBufferCreate();
+      assert(buf);
+      auto ctxt = xmlSaveToBuffer(buf, NULL, 0);
+      xmlSaveDoc(ctxt, doc);
+      xmlSaveClose(ctxt);
+      xmlFreeDoc(doc);
+      xmlBufferFree(buf);
+    }
+  }
+
+  return 0;
+}
+root@e38823cb2484:/# sed -n '1259,1300p' /src/libxml2/valid.c
+    }
+    if (englob) strcat(buf, "(");
+    switch (content->type) {
+        case XML_ELEMENT_CONTENT_PCDATA:
+            strcat(buf, "#PCDATA");
+	    break;
+	case XML_ELEMENT_CONTENT_ELEMENT:
+	    if (content->prefix != NULL) {
+		if (size - len < xmlStrlen(content->prefix) + 10) {
+		    strcat(buf, " ...");
+		    return;
+		}
+		strcat(buf, (char *) content->prefix);
+		strcat(buf, ":");
+	    }
+	    if (size - len < xmlStrlen(content->name) + 10) {
+		strcat(buf, " ...");
+		return;
+	    }
+	    if (content->name != NULL)
+		strcat(buf, (char *) content->name);
+	    break;
+	case XML_ELEMENT_CONTENT_SEQ:
+	    if ((content->c1->type == XML_ELEMENT_CONTENT_OR) ||
+	        (content->c1->type == XML_ELEMENT_CONTENT_SEQ))
+		xmlSnprintfElementContent(buf, size, content->c1, 1);
+	    else
+		xmlSnprintfElementContent(buf, size, content->c1, 0);
+	    len = strlen(buf);
+	    if (size - len < 50) {
+		if ((size - len > 4) && (buf[len - 1] != '.'))
+		    strcat(buf, " ...");
+		return;
+	    }
+            strcat(buf, " , ");
+	    if (((content->c2->type == XML_ELEMENT_CONTENT_OR) ||
+		 (content->c2->ocur != XML_ELEMENT_CONTENT_ONCE)) &&
+		(content->c2->type != XML_ELEMENT_CONTENT_ELEMENT))
+		xmlSnprintfElementContent(buf, size, content->c2, 1);
+	    else
+		xmlSnprintfElementContent(buf, size, content->c2, 0);
+	    break;
+root@e38823cb2484:/# sed -n '1230,1350p' /src/libxml2/valid.c
+ * Deprecated, unsafe, use xmlSnprintfElementContent
+ */
+void
+xmlSprintfElementContent(char *buf ATTRIBUTE_UNUSED,
+	                 xmlElementContentPtr content ATTRIBUTE_UNUSED,
+			 int englob ATTRIBUTE_UNUSED) {
+}
+#endif /* LIBXML_OUTPUT_ENABLED */
+
+/**
+ * xmlSnprintfElementContent:
+ * @buf:  an output buffer
+ * @size:  the buffer size
+ * @content:  An element table
+ * @englob: 1 if one must print the englobing parenthesis, 0 otherwise
+ *
+ * This will dump the content of the element content definition
+ * Intended just for the debug routine
+ */
+void
+xmlSnprintfElementContent(char *buf, int size, xmlElementContentPtr content, int englob) {
+    int len;
+
+    if (content == NULL) return;
+    len = strlen(buf);
+    if (size - len < 50) {
+	if ((size - len > 4) && (buf[len - 1] != '.'))
+	    strcat(buf, " ...");
+	return;
+    }
+    if (englob) strcat(buf, "(");
+    switch (content->type) {
+        case XML_ELEMENT_CONTENT_PCDATA:
+            strcat(buf, "#PCDATA");
+	    break;
+	case XML_ELEMENT_CONTENT_ELEMENT:
+	    if (content->prefix != NULL) {
+		if (size - len < xmlStrlen(content->prefix) + 10) {
+		    strcat(buf, " ...");
+		    return;
+		}
+		strcat(buf, (char *) content->prefix);
+		strcat(buf, ":");
+	    }
+	    if (size - len < xmlStrlen(content->name) + 10) {
+		strcat(buf, " ...");
+		return;
+	    }
+	    if (content->name != NULL)
+		strcat(buf, (char *) content->name);
+	    break;
+	case XML_ELEMENT_CONTENT_SEQ:
+	    if ((content->c1->type == XML_ELEMENT_CONTENT_OR) ||
+	        (content->c1->type == XML_ELEMENT_CONTENT_SEQ))
+		xmlSnprintfElementContent(buf, size, content->c1, 1);
+	    else
+		xmlSnprintfElementContent(buf, size, content->c1, 0);
+	    len = strlen(buf);
+	    if (size - len < 50) {
+		if ((size - len > 4) && (buf[len - 1] != '.'))
+		    strcat(buf, " ...");
+		return;
+	    }
+            strcat(buf, " , ");
+	    if (((content->c2->type == XML_ELEMENT_CONTENT_OR) ||
+		 (content->c2->ocur != XML_ELEMENT_CONTENT_ONCE)) &&
+		(content->c2->type != XML_ELEMENT_CONTENT_ELEMENT))
+		xmlSnprintfElementContent(buf, size, content->c2, 1);
+	    else
+		xmlSnprintfElementContent(buf, size, content->c2, 0);
+	    break;
+	case XML_ELEMENT_CONTENT_OR:
+	    if ((content->c1->type == XML_ELEMENT_CONTENT_OR) ||
+	        (content->c1->type == XML_ELEMENT_CONTENT_SEQ))
+		xmlSnprintfElementContent(buf, size, content->c1, 1);
+	    else
+		xmlSnprintfElementContent(buf, size, content->c1, 0);
+	    len = strlen(buf);
+	    if (size - len < 50) {
+		if ((size - len > 4) && (buf[len - 1] != '.'))
+		    strcat(buf, " ...");
+		return;
+	    }
+            strcat(buf, " | ");
+	    if (((content->c2->type == XML_ELEMENT_CONTENT_SEQ) ||
+		 (content->c2->ocur != XML_ELEMENT_CONTENT_ONCE)) &&
+		(content->c2->type != XML_ELEMENT_CONTENT_ELEMENT))
+		xmlSnprintfElementContent(buf, size, content->c2, 1);
+	    else
+		xmlSnprintfElementContent(buf, size, content->c2, 0);
+	    break;
+    }
+    if (englob)
+        strcat(buf, ")");
+    switch (content->ocur) {
+        case XML_ELEMENT_CONTENT_ONCE:
+	    break;
+        case XML_ELEMENT_CONTENT_OPT:
+	    strcat(buf, "?");
+	    break;
+        case XML_ELEMENT_CONTENT_MULT:
+	    strcat(buf, "*");
+	    break;
+        case XML_ELEMENT_CONTENT_PLUS:
+	    strcat(buf, "+");
+	    break;
+    }
+}
+
+/****************************************************************
+ *								*
+ *	Registration of DTD declarations			*
+ *								*
+ ****************************************************************/
+
+/**
+ * xmlFreeElement:
+ * @elem:  An element
+ *
+ * Deallocate the memory used by an element definition
+ */
+root@e38823cb2484:/# grep -rn "xmlSnprintfElementContent" /src/libxml2
+[35m[K/src/libxml2/debugXML.c[m[K[36m[K:[m[K[32m[K630[m[K[36m[K:[m[K            [01;31m[KxmlSnprintfElementContent[m[K(buf, 5000, elem->content, 1);
+[35m[K/src/libxml2/doc/devhelp/libxml2-valid.html[m[K[36m[K:[m[K[32m[K64[m[K[36m[K:[m[Kvoid	<a href="#[01;31m[KxmlSnprintfElementContent[m[K">[01;31m[KxmlSnprintfElementContent[m[K</a>	(char * buf, <br/>					 int size, <br/>					 <a href="libxml2-tree.html#xmlElementContentPtr">xmlElementContentPtr</a> content, <br/>					 int englob);
+[35m[K/src/libxml2/doc/devhelp/libxml2-valid.html[m[K[36m[K:[m[K[32m[K413[m[K[36m[K:[m[K        <div class="refsect2" lang="en"><h3><a name="[01;31m[KxmlSnprintfElementContent[m[K"/>[01;31m[KxmlSnprintfElementContent[m[K ()</h3><pre class="programlisting">void	[01;31m[KxmlSnprintfElementContent[m[K	(char * buf, <br/>					 int size, <br/>					 <a href="libxml2-tree.html#xmlElementContentPtr">xmlElementContentPtr</a> content, <br/>					 int englob)<br/>
+[35m[K/src/libxml2/doc/devhelp/libxml2-valid.html[m[K[36m[K:[m[K[32m[K418[m[K[36m[K:[m[K</pre><p>Deprecated, unsafe, use <a href="libxml2-valid.html#[01;31m[KxmlSnprintfElementContent[m[K">[01;31m[KxmlSnprintfElementContent[m[K</a></p>
+[35m[K/src/libxml2/doc/devhelp/libxml2.devhelp[m[K[36m[K:[m[K[32m[K2973[m[K[36m[K:[m[K    <function name="[01;31m[KxmlSnprintfElementContent[m[K ()" link="libxml2-valid.html#[01;31m[KxmlSnprintfElementContent[m[K"/>
+[35m[K/src/libxml2/doc/libxml2-api.xml[m[K[36m[K:[m[K[32m[K1764[m[K[36m[K:[m[K     <exports symbol='[01;31m[KxmlSnprintfElementContent[m[K' type='function'/>
+[35m[K/src/libxml2/doc/libxml2-api.xml[m[K[36m[K:[m[K[32m[K14439[m[K[36m[K:[m[K    <function name='[01;31m[KxmlSnprintfElementContent[m[K' file='valid' module='valid'>
+[35m[K/src/libxml2/doc/libxml2-api.xml[m[K[36m[K:[m[K[32m[K14468[m[K[36m[K:[m[K      <info>Deprecated, unsafe, use [01;31m[KxmlSnprintfElementContent[m[K</info>
+[35m[K/src/libxml2/doc/APIchunk13.html[m[K[36m[K:[m[K[32m[K111[m[K[36m[K:[m[K<a href="html/libxml-valid.html#[01;31m[KxmlSnprintfElementContent[m[K">[01;31m[KxmlSnprintfElementContent[m[K</a><br />
+[35m[K/src/libxml2/doc/APIchunk13.html[m[K[36m[K:[m[K[32m[K605[m[K[36m[K:[m[K<a href="html/libxml-valid.html#[01;31m[KxmlSnprintfElementContent[m[K">[01;31m[KxmlSnprintfElementContent[m[K</a><br />
+[35m[K/src/libxml2/doc/APIchunk14.html[m[K[36m[K:[m[K[32m[K180[m[K[36m[K:[m[K<a href="html/libxml-valid.html#[01;31m[KxmlSnprintfElementContent[m[K">[01;31m[KxmlSnprintfElementContent[m[K</a><br />
+[35m[K/src/libxml2/doc/APIchunk18.html[m[K[36m[K:[m[K[32m[K55[m[K[36m[K:[m[K<a href="html/libxml-valid.html#[01;31m[KxmlSnprintfElementContent[m[K">[01;31m[KxmlSnprintfElementContent[m[K</a><br />
+[35m[K/src/libxml2/doc/APIchunk22.html[m[K[36m[K:[m[K[32m[K76[m[K[36m[K:[m[K</dd><dt>parenthesis</dt><dd><a href="html/libxml-valid.html#[01;31m[KxmlSnprintfElementContent[m[K">[01;31m[KxmlSnprintfElementContent[m[K</a><br />
+[35m[K/src/libxml2/doc/APIchunk22.html[m[K[36m[K:[m[K[32m[K370[m[K[36m[K:[m[K<a href="html/libxml-valid.html#[01;31m[KxmlSnprintfElementContent[m[K">[01;31m[KxmlSnprintfElementContent[m[K</a><br />
+[35m[K/src/libxml2/doc/APIchunk28.html[m[K[36m[K:[m[K[32m[K428[m[K[36m[K:[m[K</dd><dt>[01;31m[KxmlSnprintfElementContent[m[K</dt><dd><a href="html/libxml-valid.html#xmlSprintfElementContent">xmlSprintfElementContent</a><br />
+[35m[K/src/libxml2/doc/APIchunk3.html[m[K[36m[K:[m[K[32m[K322[m[K[36m[K:[m[K</dd><dt>Intended</dt><dd><a href="html/libxml-valid.html#[01;31m[KxmlSnprintfElementContent[m[K">[01;31m[KxmlSnprintfElementContent[m[K</a><br />
+[35m[K/src/libxml2/doc/APIfiles.html[m[K[36m[K:[m[K[32m[K1670[m[K[36m[K:[m[K<a href="html/libxml-valid.html#[01;31m[KxmlSnprintfElementContent[m[K">[01;31m[KxmlSnprintfElementContent[m[K</a><br />
+[35m[K/src/libxml2/doc/APIfunctions.html[m[K[36m[K:[m[K[32m[K1285[m[K[36m[K:[m[K<a href="html/libxml-valid.html#[01;31m[KxmlSnprintfElementContent[m[K">[01;31m[KxmlSnprintfElementContent[m[K</a><br />
+[35m[K/src/libxml2/doc/APIsymbols.html[m[K[36m[K:[m[K[32m[K2908[m[K[36m[K:[m[K<a href="html/libxml-valid.html#[01;31m[KxmlSnprintfElementContent[m[K">[01;31m[KxmlSnprintfElementContent[m[K</a><br />
+[35m[K/src/libxml2/doc/html/libxml-valid.html[m[K[36m[K:[m[K[32m[K75[m[K[36m[K:[m[K<pre class="programlisting">void	<a href="#[01;31m[KxmlSnprintfElementContent[m[K">[01;31m[KxmlSnprintfElementContent[m[K</a>	(char * buf, <br />					 int size, <br />					 <a href="libxml-tree.html#xmlElementContentPtr">xmlElementContentPtr</a> content, <br />					 int englob)</pre>
+[35m[K/src/libxml2/doc/html/libxml-valid.html[m[K[36m[K:[m[K[32m[K227[m[K[36m[K:[m[K<div class="variablelist"><table border="0"><col align="left" /><tbody><tr><td><span class="term"><i><tt>doc</tt></i>:</span></td><td>the document</td></tr><tr><td><span class="term"><i><tt>attr</tt></i>:</span></td><td>the <a href="libxml-SAX.html#attribute">attribute</a></td></tr><tr><td><span class="term"><i><tt>Returns</tt></i>:</span></td><td>-1 if the lookup failed and 0 otherwise</td></tr></tbody></table></div><h3><a name="[01;31m[KxmlSnprintfElementContent[m[K" id="[01;31m[KxmlSnprintfElementContent[m[K"></a>Function: [01;31m[KxmlSnprintfElementContent[m[K</h3><pre class="programlisting">void	[01;31m[KxmlSnprintfElementContent[m[K	(char * buf, <br />					 int size, <br />					 <a href="libxml-tree.html#xmlElementContentPtr">xmlElementContentPtr</a> content, <br />					 int englob)<br />
+[35m[K/src/libxml2/doc/html/libxml-valid.html[m[K[36m[K:[m[K[32m[K230[m[K[36m[K:[m[K</pre><p>Deprecated, unsafe, use <a href="libxml-valid.html#[01;31m[KxmlSnprintfElementContent[m[K">[01;31m[KxmlSnprintfElementContent[m[K</a></p>
+[35m[K/src/libxml2/doc/libxml2-refs.xml[m[K[36m[K:[m[K[32m[K2902[m[K[36m[K:[m[K    <reference name='[01;31m[KxmlSnprintfElementContent[m[K' href='html/libxml-valid.html#[01;31m[KxmlSnprintfElementContent[m[K'/>
+[35m[K/src/libxml2/doc/libxml2-refs.xml[m[K[36m[K:[m[K[32m[K6540[m[K[36m[K:[m[K      <ref name='[01;31m[KxmlSnprintfElementContent[m[K'/>
+[35m[K/src/libxml2/doc/libxml2-refs.xml[m[K[36m[K:[m[K[32m[K9447[m[K[36m[K:[m[K      <ref name='[01;31m[KxmlSnprintfElementContent[m[K'/>
+[35m[K/src/libxml2/doc/libxml2-refs.xml[m[K[36m[K:[m[K[32m[K12465[m[K[36m[K:[m[K      <ref name='[01;31m[KxmlSnprintfElementContent[m[K'/>
+[35m[K/src/libxml2/doc/libxml2-refs.xml[m[K[36m[K:[m[K[32m[K16365[m[K[36m[K:[m[K          <ref name='[01;31m[KxmlSnprintfElementContent[m[K'/>
+[35m[K/src/libxml2/doc/libxml2-refs.xml[m[K[36m[K:[m[K[32m[K21443[m[K[36m[K:[m[K          <ref name='[01;31m[KxmlSnprintfElementContent[m[K'/>
+[35m[K/src/libxml2/doc/libxml2-refs.xml[m[K[36m[K:[m[K[32m[K22143[m[K[36m[K:[m[K          <ref name='[01;31m[KxmlSnprintfElementContent[m[K'/>
+[35m[K/src/libxml2/doc/libxml2-refs.xml[m[K[36m[K:[m[K[32m[K22405[m[K[36m[K:[m[K          <ref name='[01;31m[KxmlSnprintfElementContent[m[K'/>
+[35m[K/src/libxml2/doc/libxml2-refs.xml[m[K[36m[K:[m[K[32m[K24613[m[K[36m[K:[m[K          <ref name='[01;31m[KxmlSnprintfElementContent[m[K'/>
+[35m[K/src/libxml2/doc/libxml2-refs.xml[m[K[36m[K:[m[K[32m[K26561[m[K[36m[K:[m[K          <ref name='[01;31m[KxmlSnprintfElementContent[m[K'/>
+[35m[K/src/libxml2/doc/libxml2-refs.xml[m[K[36m[K:[m[K[32m[K27019[m[K[36m[K:[m[K          <ref name='[01;31m[KxmlSnprintfElementContent[m[K'/>
+[35m[K/src/libxml2/doc/libxml2-refs.xml[m[K[36m[K:[m[K[32m[K31827[m[K[36m[K:[m[K        <word name='[01;31m[KxmlSnprintfElementContent[m[K'>
+[35m[K/src/libxml2/doc/symbols.xml[m[K[36m[K:[m[K[32m[K594[m[K[36m[K:[m[K    <symbol file="valid">[01;31m[KxmlSnprintfElementContent[m[K</symbol>
+[35m[K/src/libxml2/include/libxml/valid.h[m[K[36m[K:[m[K[32m[K195[m[K[36m[K:[m[K		[01;31m[KxmlSnprintfElementContent[m[K(char *buf,
+[35m[K/src/libxml2/libxml2.syms[m[K[36m[K:[m[K[32m[K664[m[K[36m[K:[m[K  [01;31m[KxmlSnprintfElementContent[m[K;
+[35m[K/src/libxml2/os400/libxmlrpg/valid.rpgle[m[K[36m[K:[m[K[32m[K190[m[K[36m[K:[m[K     d [01;31m[KxmlSnprintfElementContent[m[K...
+[35m[K/src/libxml2/os400/libxmlrpg/valid.rpgle[m[K[36m[K:[m[K[32m[K191[m[K[36m[K:[m[K     d                 pr                  extproc('[01;31m[KxmlSnprintfElementContent[m[K')
+[35m[K/src/libxml2/testapi.c[m[K[36m[K:[m[K[32m[K25908[m[K[36m[K:[m[Ktest_[01;31m[KxmlSnprintfElementContent[m[K(void) {
+[35m[K/src/libxml2/testapi.c[m[K[36m[K:[m[K[32m[K25931[m[K[36m[K:[m[K        [01;31m[KxmlSnprintfElementContent[m[K(buf, size, content, englob);
+[35m[K/src/libxml2/testapi.c[m[K[36m[K:[m[K[32m[K25939[m[K[36m[K:[m[K            printf("Leak of %d blocks found in [01;31m[KxmlSnprintfElementContent[m[K",
+[35m[K/src/libxml2/testapi.c[m[K[36m[K:[m[K[32m[K27288[m[K[36m[K:[m[K    test_ret += test_[01;31m[KxmlSnprintfElementContent[m[K();
+[35m[K/src/libxml2/valid.c[m[K[36m[K:[m[K[32m[K576[m[K[36m[K:[m[K    [01;31m[KxmlSnprintfElementContent[m[K(expr, 5000, cont, 1);
+[35m[K/src/libxml2/valid.c[m[K[36m[K:[m[K[32m[K845[m[K[36m[K:[m[K	[01;31m[KxmlSnprintfElementContent[m[K(expr, 5000, elem->content, 1);
+[35m[K/src/libxml2/valid.c[m[K[36m[K:[m[K[32m[K1230[m[K[36m[K:[m[K * Deprecated, unsafe, use [01;31m[KxmlSnprintfElementContent[m[K
+[35m[K/src/libxml2/valid.c[m[K[36m[K:[m[K[32m[K1240[m[K[36m[K:[m[K * [01;31m[KxmlSnprintfElementContent[m[K:
+[35m[K/src/libxml2/valid.c[m[K[36m[K:[m[K[32m[K1250[m[K[36m[K:[m[K[01;31m[KxmlSnprintfElementContent[m[K(char *buf, int size, xmlElementContentPtr content, int englob) {
+[35m[K/src/libxml2/valid.c[m[K[36m[K:[m[K[32m[K1284[m[K[36m[K:[m[K		[01;31m[KxmlSnprintfElementContent[m[K(buf, size, content->c1, 1);
+[35m[K/src/libxml2/valid.c[m[K[36m[K:[m[K[32m[K1286[m[K[36m[K:[m[K		[01;31m[KxmlSnprintfElementContent[m[K(buf, size, content->c1, 0);
+[35m[K/src/libxml2/valid.c[m[K[36m[K:[m[K[32m[K1297[m[K[36m[K:[m[K		[01;31m[KxmlSnprintfElementContent[m[K(buf, size, content->c2, 1);
+[35m[K/src/libxml2/valid.c[m[K[36m[K:[m[K[32m[K1299[m[K[36m[K:[m[K		[01;31m[KxmlSnprintfElementContent[m[K(buf, size, content->c2, 0);
+[35m[K/src/libxml2/valid.c[m[K[36m[K:[m[K[32m[K1304[m[K[36m[K:[m[K		[01;31m[KxmlSnprintfElementContent[m[K(buf, size, content->c1, 1);
+[35m[K/src/libxml2/valid.c[m[K[36m[K:[m[K[32m[K1306[m[K[36m[K:[m[K		[01;31m[KxmlSnprintfElementContent[m[K(buf, size, content->c1, 0);
+[35m[K/src/libxml2/valid.c[m[K[36m[K:[m[K[32m[K1317[m[K[36m[K:[m[K		[01;31m[KxmlSnprintfElementContent[m[K(buf, size, content->c2, 1);
+[35m[K/src/libxml2/valid.c[m[K[36m[K:[m[K[32m[K1319[m[K[36m[K:[m[K		[01;31m[KxmlSnprintfElementContent[m[K(buf, size, content->c2, 0);
+[35m[K/src/libxml2/valid.c[m[K[36m[K:[m[K[32m[K5445[m[K[36m[K:[m[K	    [01;31m[KxmlSnprintfElementContent[m[K(&expr[0], 5000, cont, 1);
+[35m[K/src/libxml2/win32/libxml2.def.src[m[K[36m[K:[m[K[32m[K1877[m[K[36m[K:[m[K[01;31m[KxmlSnprintfElementContent[m[K
+[35m[K/src/libxml2/elfgcchack.h[m[K[36m[K:[m[K[32m[K10735[m[K[36m[K:[m[K#undef [01;31m[KxmlSnprintfElementContent[m[K
+[35m[K/src/libxml2/elfgcchack.h[m[K[36m[K:[m[K[32m[K10736[m[K[36m[K:[m[Kextern __typeof ([01;31m[KxmlSnprintfElementContent[m[K) [01;31m[KxmlSnprintfElementContent[m[K __attribute((alias("[01;31m[KxmlSnprintfElementContent[m[K__internal_alias")));
+[35m[K/src/libxml2/elfgcchack.h[m[K[36m[K:[m[K[32m[K10738[m[K[36m[K:[m[K#ifndef [01;31m[KxmlSnprintfElementContent[m[K
+[35m[K/src/libxml2/elfgcchack.h[m[K[36m[K:[m[K[32m[K10739[m[K[36m[K:[m[Kextern __typeof ([01;31m[KxmlSnprintfElementContent[m[K) [01;31m[KxmlSnprintfElementContent[m[K__internal_alias __attribute((visibility("hidden")));
+[35m[K/src/libxml2/elfgcchack.h[m[K[36m[K:[m[K[32m[K10740[m[K[36m[K:[m[K#define [01;31m[KxmlSnprintfElementContent[m[K [01;31m[KxmlSnprintfElementContent[m[K__internal_alias
+root@e38823cb2484:/# sed -n '5420,5460p' /src/libxml2/valid.c
+		if (cur == NULL)
+		    break;
+		cur = cur->next;
+	    }
+	}
+
+	/*
+	 * Relaunch the validation
+	 */
+	ctxt->vstate = &ctxt->vstateTab[0];
+	ctxt->vstateNr = 1;
+	CONT = cont;
+	NODE = repl;
+	DEPTH = 0;
+	OCCURS = 0;
+	STATE = 0;
+	ret = xmlValidateElementType(ctxt);
+    }
+#endif /* LIBXML_REGEXP_ENABLED */
+    if ((warn) && ((ret != 1) && (ret != -3))) {
+	if (ctxt != NULL) {
+	    char expr[5000];
+	    char list[5000];
+
+	    expr[0] = 0;
+	    xmlSnprintfElementContent(&expr[0], 5000, cont, 1);
+	    list[0] = 0;
+#ifndef LIBXML_REGEXP_ENABLED
+	    if (repl != NULL)
+		xmlSnprintfElements(&list[0], 5000, repl, 1);
+	    else
+#endif /* LIBXML_REGEXP_ENABLED */
+		xmlSnprintfElements(&list[0], 5000, child, 1);
+
+	    if (name != NULL) {
+		xmlErrValidNode(ctxt, parent, XML_DTD_CONTENT_MODEL,
+	   "Element %s content does not follow the DTD, expecting %s, got %s\n",
+		       name, BAD_CAST expr, BAD_CAST list);
+	    } else {
+		xmlErrValidNode(ctxt, parent, XML_DTD_CONTENT_MODEL,
+	   "Element content does not follow the DTD, expecting %s, got %s\n",
+root@e38823cb2484:/# sed -n '566,586p' /src/libxml2/valid.c
+}
+
+static void
+xmlValidDebug(xmlNodePtr cur, xmlElementContentPtr cont) {
+    char expr[5000];
+
+    expr[0] = 0;
+    xmlGenericError(xmlGenericErrorContext, "valid: ");
+    xmlValidPrintNodeList(cur);
+    xmlGenericError(xmlGenericErrorContext, "against ");
+    xmlSnprintfElementContent(expr, 5000, cont, 1);
+    xmlGenericError(xmlGenericErrorContext, "%s\n", expr);
+}
+
+static void
+xmlValidDebugState(xmlValidStatePtr state) {
+    xmlGenericError(xmlGenericErrorContext, "(");
+    if (state->cont == NULL)
+	xmlGenericError(xmlGenericErrorContext, "null,");
+    else
+	switch (state->cont->type) {
+root@e38823cb2484:/# sed -n '835,855p' /src/libxml2/valid.c
+		        elem->name, NULL, NULL);
+	return(0);
+    }
+    ctxt->state = xmlAutomataGetInitState(ctxt->am);
+    xmlValidBuildAContentModel(elem->content, ctxt, elem->name);
+    xmlAutomataSetFinalState(ctxt->am, ctxt->state);
+    elem->contModel = xmlAutomataCompile(ctxt->am);
+    if (xmlRegexpIsDeterminist(elem->contModel) != 1) {
+	char expr[5000];
+	expr[0] = 0;
+	xmlSnprintfElementContent(expr, 5000, elem->content, 1);
+	xmlErrValidNode(ctxt, (xmlNodePtr) elem,
+	                XML_DTD_CONTENT_NOT_DETERMINIST,
+	       "Content model of %s is not determinist: %s\n",
+	       elem->name, BAD_CAST expr, NULL);
+#ifdef DEBUG_REGEXP_ALGO
+        xmlRegexpPrint(stderr, elem->contModel);
+#endif
+        ctxt->valid = 0;
+	ctxt->state = NULL;
+	xmlFreeAutomata(ctxt->am);
+root@e38823cb2484:/# sed -n '800,820p' /src/libxml2/valid.c
+    return(1);
+}
+/**
+ * xmlValidBuildContentModel:
+ * @ctxt:  a validation context
+ * @elem:  an element declaration node
+ *
+ * (Re)Build the automata associated to the content model of this
+ * element
+ *
+ * Returns 1 in case of success, 0 in case of error
+ */
+int
+xmlValidBuildContentModel(xmlValidCtxtPtr ctxt, xmlElementPtr elem) {
+
+    if ((ctxt == NULL) || (elem == NULL))
+	return(0);
+    if (elem->type != XML_ELEMENT_DECL)
+	return(0);
+    if (elem->etype != XML_ELEMENT_TYPE_ELEMENT)
+	return(1);
+root@e38823cb2484:/# cat << 'EOF' > /tmp/check_opts.py
+> import ctypes, sys
+> with open('/src/libxml2/include/libxml/parser.h') as f:
+>     for line in f:
+>         if 'XML_PARSE_DTDVALID' in line or 'XML_PARSE_NOENT' in line:
+>             print(line.strip())
+> EOF
+root@e38823cb2484:/# python3 /tmp/check_opts.py
+XML_PARSE_NOENT	= 1<<1,	/* substitute entities */
+XML_PARSE_DTDVALID	= 1<<4,	/* validate with the DTD */
+root@e38823cb2484:/# cat << 'EOF' > /tmp/check_hash.cc
+> #include <iostream>
+> #include <string>
+> #include <fstream>
+> #include <limits>
+> #include <sstream>
+> 
+> int main(int argc, char** argv) {
+>     std::ifstream t(argv[1]);
+>     std::stringstream buffer;
+>     buffer << t.rdbuf();
+>     std::string data = buffer.str();
+>     std::size_t hash = std::hash<std::string>()(data);
+>     int opt = hash % std::numeric_limits<int>::max();
+>     std::cout << "Hash: " << hash << " Opt: " << opt << " Valid: " << ((opt & 16) != 0) << std::endl;
+>     return 0;
+> }
+> EOF
+root@e38823cb2484:/# g++ -o /tmp/check_hash /tmp/check_hash.cc
+root@e38823cb2484:/# /tmp/check_hash /tmp/test2.xml
+Hash: 14993841812579356264 Opt: 828028363 Valid: 0
+root@e38823cb2484:/# cat /src/libxml2/include/libxml/parser.h | grep -A 35 XML_PARSE_RECOVER
+    [01;31m[KXML_PARSE_RECOVER[m[K	= 1<<0,	/* recover on errors */
+    XML_PARSE_NOENT	= 1<<1,	/* substitute entities */
+    XML_PARSE_DTDLOAD	= 1<<2,	/* load the external subset */
+    XML_PARSE_DTDATTR	= 1<<3,	/* default DTD attributes */
+    XML_PARSE_DTDVALID	= 1<<4,	/* validate with the DTD */
+    XML_PARSE_NOERROR	= 1<<5,	/* suppress error reports */
+    XML_PARSE_NOWARNING	= 1<<6,	/* suppress warning reports */
+    XML_PARSE_PEDANTIC	= 1<<7,	/* pedantic error reporting */
+    XML_PARSE_NOBLANKS	= 1<<8,	/* remove blank nodes */
+    XML_PARSE_SAX1	= 1<<9,	/* use the SAX1 interface internally */
+    XML_PARSE_XINCLUDE	= 1<<10,/* Implement XInclude substitition  */
+    XML_PARSE_NONET	= 1<<11,/* Forbid network access */
+    XML_PARSE_NODICT	= 1<<12,/* Do not reuse the context dictionary */
+    XML_PARSE_NSCLEAN	= 1<<13,/* remove redundant namespaces declarations */
+    XML_PARSE_NOCDATA	= 1<<14,/* merge CDATA as text nodes */
+    XML_PARSE_NOXINCNODE= 1<<15,/* do not generate XINCLUDE START/END nodes */
+    XML_PARSE_COMPACT   = 1<<16,/* compact small text nodes; no modification of
+                                   the tree allowed afterwards (will possibly
+				   crash if you try to modify the tree) */
+    XML_PARSE_OLD10	= 1<<17,/* parse using XML-1.0 before update 5 */
+    XML_PARSE_NOBASEFIX = 1<<18,/* do not fixup XINCLUDE xml:base uris */
+    XML_PARSE_HUGE      = 1<<19,/* relax any hardcoded limit from the parser */
+    XML_PARSE_OLDSAX    = 1<<20,/* parse using SAX2 interface before 2.7.0 */
+    XML_PARSE_IGNORE_ENC= 1<<21,/* ignore internal document encoding hint */
+    XML_PARSE_BIG_LINES = 1<<22 /* Store big lines numbers in text PSVI field */
+} xmlParserOption;
+
+XMLPUBFUN void XMLCALL
+		xmlCtxtReset		(xmlParserCtxtPtr ctxt);
+XMLPUBFUN int XMLCALL
+		xmlCtxtResetPush	(xmlParserCtxtPtr ctxt,
+					 const char *chunk,
+					 int size,
+					 const char *filename,
+					 const char *encoding);
+XMLPUBFUN int XMLCALL
+root@e38823cb2484:/# cat << 'EOF' > /tmp/search.cc
+> #include <iostream>
+> #include <string>
+> #include <fstream>
+> #include <limits>
+> #include <functional>
+> 
+> int main() {
+>     int depth = 4000;
+>     std::string s = "a";
+>     for (int i = 0; i < depth; i++) {
+>         s = "(a|" + s + ")";
+>     }
+>     std::string base_xml = "<!DOCTYPE root [\n<!ELEMENT root " + s + ">\n]>\n<root><b/></root>";
+>     
+>     std::hash<std::string> hasher;
+>     long long max_opt = std::numeric_limits<int>::max();
+>     
+>     for (int i = 0; i < 1000000; i++) {
+>         std::string test_str = base_xml + std::string(i, ' ');
+>         long long hash = hasher(test_str);
+>         int opt = hash % max_opt;
+>         if ((opt & 16) && (opt & (1<<19)) && !(opt & (1<<5))) { // Want DTDVALID, HUGE, NO NOERROR
+>             std::ofstream out("/tmp/test_huge.xml");
+>             out << test_str;
+>             std::cout << "Found at padding " << i << " opt " << opt << std::endl;
+>             return 0;
+>         }
+>     }
+>     return 1;
+> }
+> EOF
+root@e38823cb2484:/# g++ -O3 -o /tmp/search /tmp/search.cc
+root@e38823cb2484:/# /tmp/search
+Found at padding 1 opt -1230416611
+root@e38823cb2484:/# /out/libxml2_xml_read_memory_fuzzer /tmp/test_huge.xml > /tmp/crash_output.txt 2>&1
+root@e38823cb2484:/# cat /tmp/crash_output.txt | grep -i asan
+root@e38823cb2484:/# cat /tmp/crash_output.txt
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 463763372
+INFO: Loaded 1 modules   (56424 inline 8-bit counters): 56424 [0xb4d310, 0xb5af78), 
+INFO: Loaded 1 PC tables (56424 PCs): 56424 [0x9b68e0,0xa92f60), 
+/out/libxml2_xml_read_memory_fuzzer: Running 1 inputs 1 time(s) each.
+Running: /tmp/test_huge.xml
+Executed /tmp/test_huge.xml in 8 ms
+***
+*** NOTE: fuzzing was not performed, you have only
+***       executed the target code on a fixed set of inputs.
+***
+root@e38823cb2484:/# sed -n '15,35p' /src/libxml2_xml_read_memory_fuzzer.cc
+
+void ignore (void* ctx, const char* msg, ...) {
+  // Error handler to avoid spam of error messages from libxml parser.
+}
+
+extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
+  xmlSetGenericErrorFunc(NULL, &ignore);
+
+  // Test default empty options value and some random combination.
+  std::string data_string(reinterpret_cast<const char*>(data), size);
+  const std::size_t data_hash = std::hash<std::string>()(data_string);
+  const int max_option_value = std::numeric_limits<int>::max();
+  const int random_option_value = data_hash % max_option_value;
+  const int options[] = {0, random_option_value};
+
+  for (const auto option_value : options) {
+    if (auto doc = xmlReadMemory(data_string.c_str(), data_string.length(),
+                                 "noname.xml", NULL, option_value)) {
+      auto buf = xmlBufferCreate();
+      assert(buf);
+      auto ctxt = xmlSaveToBuffer(buf, NULL, 0);
+root@e38823cb2484:/# cat << 'EOF' > /tmp/search2.cc
+> #include <iostream>
+> #include <string>
+> #include <fstream>
+> #include <limits>
+> #include <functional>
+> 
+> int main() {
+>     // Use depth 5000 to be sure it exceeds 5000 bytes when multiplied by 2 or more closing parens.
+>     // Since size is 5000, max bound, englob=1 adds parens, and recurse also.
+>     // Wait, deep tree might hit MAX_DEPTH unless HUGE is used.
+>     int depth = 5000;
+>     std::string s = "a";
+>     // building non-determinist model, or just nesting:
+>     for (int i = 0; i < depth; i++) {
+>         s = "(a|" + s + ")";
+>     }
+>     std::string base_xml = "<!DOCTYPE root [\n<!ELEMENT root " + s + ">\n]>\n<root><b/></root>";
+>     
+>     std::hash<std::string> hasher;
+>     const int max_option_value = std::numeric_limits<int>::max();
+>     
+>     for (int i = 0; i < 10000000; i++) {
+>         std::string test_str = base_xml + std::string(i, ' ');
+>         std::size_t hash = hasher(test_str);
+>         int opt = hash % max_option_value;
+>         
+>         // Want DTDVALID (16)
+>         // Optional but preferred HUGE (1<<19)
+>         // Do not want NOERROR (1<<5)
+>         // Do not want RECOVER (1), NOENT(2), SAX1(1<<9), NONET(1<<11), IGNORE_ENC(1<<21)
+>         if ((opt & 16) && (opt & (1<<19)) && !(opt & 0xFFDFDFF1)) {
+>             std::ofstream out("/tmp/test_huge2.xml");
+>             out << test_str;
+>             std::cout << "Found at padding " << i << " opt " << opt << std::endl;
+>             return 0;
+>         }
+>     }
+>     return 1;
+> }
+> EOF
+root@e38823cb2484:/# g++ -O3 -o /tmp/search2 /tmp/search2.cc
+[01m[K/tmp/search2.cc:[m[K In function '[01m[Kint main()[m[K':
+[01m[K/tmp/search2.cc:39:1:[m[K [01;35m[Kwarning: [m[K'[01m[Kand[m[K' of mutually exclusive equal-tests is always 0
+   39 | [01;35m[K}[m[K
+      | [01;35m[K^[m[K
+root@e38823cb2484:/# /tmp/search2
+C-c
+cat << 'EOF' > /tmp/search2.cc
+#include <iostream>
+#include <string>
+#include <fstream>
+#include <limits>
+#include <functional>
+
+int main() {
+    int depth = 5000;
+    std::string s = "a";
+    for (int i = 0; i < depth; i++) {
+        s = "(a|" + s + ")";
+    }
+    std::string base_xml = "<!DOCTYPE root [\n<!ELEMENT root " + s + ">\n]>\n<root><b/></root>";
+    
+    std::hash<std::string> hasher;
+    const int max_option_value = std::numeric_limits<int>::max();
+    
+    for (int i = 0; i < 100000; i++) {
+        std::string test_str = base_xml + std::string(i, ' ');
+        std::size_t hash = hasher(test_str);
+        int opt = hash % max_option_value;
+        
+        if ((opt & 16) && (opt & (1<<19)) && !(opt & 32)) {
+            std::ofstream out("/tmp/test_huge2.xml");
+            out << test_str;
+            std::cout << "Found at padding " << i << " opt " << opt << std::endl;
+            return 0;
+        }
+    }
+    return 1;
+}
+EOF
+g++ -O3 -o /tmp/search2 /tmp/search2.cc
+/tmp/search2
+/out/libxml2_xml_read_memory_fuzzer /tmp/test_huge2.xml > /tmp/crash_output.txt 2>&1
+cat /tmp/crash_output.txt | grep -A 5 -i asan
+cat << 'EOF' > /tmp/search3.cc
+#include <iostream>
+#include <string>
+#include <fstream>
+#include <limits>
+#include <functional>
+
+int main() {
+    int depth = 5000;
+    std::string s = "a";
+    for (int i = 0; i < depth; i++) {
+        s = "(a|" + s + ")";
+    }
+    std::string base_xml = "<!DOCTYPE root [\n<!ELEMENT root " + s + ">\n]>\n<root><b/></root>";
+    
+    std::hash<std::string> hasher;
+    const int max_option_value = std::numeric_limits<int>::max();
+    
+    for (int i = 0; i < 100000; i++) {
+        std::string test_str = base_xml + std::string(i, ' ');
+        std::size_t hash = hasher(test_str);
+        int opt = hash % max_option_value;
+        
+        if ((opt & 16) && (opt & (1<<19)) && !(opt & 32) && !(opt & 256) && !(opt & 4096)) {
+            std::ofstream out("/tmp/test_huge3.xml");
+            out << test_str;
+            std::cout << "Found at padding " << i << " opt " << opt << std::endl;
+            return 0;
+        }
+    }
+    return 1;
+}
+EOF
+g++ -O3 -o /tmp/search3 /tmp/search3.cc
+/tmp/search3
+/out/libxml2_xml_read_memory_fuzzer /tmp/test_huge3.xml > /tmp/crash_output.txt 2>&1
+grep -A 5 -i asan /tmp/crash_output.txt
+
+cat /tmp/crash_output.txt
+^C
+
+root@e38823cb2484:/# 
+root@e38823cb2484:/# echo PROCESS_INTERRUPTED
+PROCESS_INTERRUPTED
+root@e38823cb2484:/# cat << 'EOF' > /tmp/search4.cc
+> #include <iostream>
+> #include <string>
+> #include <fstream>
+> #include <limits>
+> #include <functional>
+> 
+> int main() {
+>     int depth = 5000;
+>     std::string s = "a";
+>     // building linear depth model
+>     for (int i = 0; i < depth; i++) {
+>         s = "(a|" + s + ")";
+>     }
+>     std::string base_xml = "<!DOCTYPE root [\n<!ELEMENT root " + s + ">\n]>\n<root><b/></root>";
+>     std::string test_str = base_xml;
+>     
+>     std::hash<std::string> hasher;
+>     const int max_option_value = std::numeric_limits<int>::max();
+>     
+>     for (int i = 0; i < 10000000; i++) {
+>         test_str += " "; // fast append
+>         std::size_t hash = hasher(test_str);
+>         int opt = hash % max_option_value;
+>         
+>         if ((opt & 16) && (opt & (1<<19)) && !(opt & 32) && !(opt & 256) && !(opt & 1024)) {
+>             std::ofstream out("/tmp/test_huge3.xml");
+>             out << test_str;
+>             std::cout << "Found at len " << test_str.length() << " opt " << opt << std::endl;
+>             return 0;
+>         }
+>     }
+>     return 1;
+> }
+> EOF
+root@e38823cb2484:/# g++ -O3 -o /tmp/search4 /tmp/search4.cc
+root@e38823cb2484:/# /tmp/search4
+Found at len 20059 opt 758842065
+root@e38823cb2484:/# /out/libxml2_xml_read_memory_fuzzer /tmp/test_huge3.xml > /tmp/crash_output.txt 2>&1
+root@e38823cb2484:/# grep -A 5 AddressSanitizer /tmp/crash_output.txt
+root@e38823cb2484:/# cat /tmp/crash_output.txt
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 554409611
+INFO: Loaded 1 modules   (56424 inline 8-bit counters): 56424 [0xb4d310, 0xb5af78), 
+INFO: Loaded 1 PC tables (56424 PCs): 56424 [0x9b68e0,0xa92f60), 
+/out/libxml2_xml_read_memory_fuzzer: Running 1 inputs 1 time(s) each.
+Running: /tmp/test_huge3.xml
+Executed /tmp/test_huge3.xml in 8 ms
+***
+*** NOTE: fuzzing was not performed, you have only
+***       executed the target code on a fixed set of inputs.
+***
+root@e38823cb2484:/# cat << 'EOF' > /tmp/test_small.xml
+> <!DOCTYPE root [
+> <!ELEMENT root (a|(a|b))>
+> <!ELEMENT a EMPTY>
+> <!ELEMENT b EMPTY>
+> ]>
+> <root><b/></root>
+> EOF
+root@e38823cb2484:/# /src/libxml2/xmllint --valid --noout /tmp/test_small.xml
+bash: /src/libxml2/xmllint: No such file or directory
+root@e38823cb2484:/# cat << 'EOF' > /tmp/parse.c
+> #include <stdio.h>
+> #include <libxml/parser.h>
+> #include <libxml/tree.h>
+> 
+> int main(int argc, char **argv) {
+>     xmlDocPtr doc = xmlReadFile(argv[1], NULL, XML_PARSE_DTDVALID | XML_PARSE_HUGE);
+>     if (doc == NULL) {
+>         printf("Failed to parse\n");
+>         return 1;
+>     }
+>     xmlFreeDoc(doc);
+>     xmlCleanupParser();
+>     return 0;
+> }
+> EOF
+root@e38823cb2484:/# gcc -I/usr/include/libxml2 -o /tmp/parse /tmp/parse.c -lxml2
+[01m[K/tmp/parse.c:2:10:[m[K [01;31m[Kfatal error: [m[Klibxml/parser.h: No such file or directory
+    2 | #include [01;31m[K<libxml/parser.h>[m[K
+      |          [01;31m[K^~~~~~~~~~~~~~~~~[m[K
+compilation terminated.
+root@e38823cb2484:/# /tmp/parse /tmp/test_small.xml
+bash: /tmp/parse: No such file or directory
+root@e38823cb2484:/# gcc -I/src/libxml2/include -L/src/libxml2/.libs -o /tmp/parse /tmp/parse.c -lxml2
+In file included from [01m[K/tmp/parse.c:2[m[K:
+[01m[K/src/libxml2/include/libxml/parser.h:15:10:[m[K [01;31m[Kfatal error: [m[Klibxml/xmlversion.h: No such file or directory
+   15 | #include [01;31m[K<libxml/xmlversion.h>[m[K
+      |          [01;31m[K^~~~~~~~~~~~~~~~~~~~~[m[K
+compilation terminated.
+root@e38823cb2484:/# /tmp/parse /tmp/test_small.xml
+bash: /tmp/parse: No such file or directory
+root@e38823cb2484:/# cat << 'EOF' > /tmp/search5.cc
+> #include <iostream>
+> #include <string>
+> #include <fstream>
+> #include <limits>
+> #include <functional>
+> 
+> int main() {
+>     int depth = 5000;
+>     std::string s = "a";
+>     // building linear depth model sequence
+>     for (int i = 0; i < depth; i++) {
+>         s = "(a," + s + ")";
+>     }
+>     std::string base_xml = "<!DOCTYPE root [\n<!ELEMENT root " + s + ">\n<!ELEMENT a EMPTY>\n<!ELEMENT d EMPTY>\n]>\n<root><d/></root>";
+>     std::string test_str = base_xml;
+>     
+>     std::hash<std::string> hasher;
+>     const int max_option_value = std::numeric_limits<int>::max();
+>     
+>     for (int i = 0; i < 1000000; i++) {
+>         test_str += " ";
+>         std::size_t hash = hasher(test_str);
+>         int opt = hash % max_option_value;
+>         
+>         if ((opt & 16) && (opt & (1<<19)) && !(opt & 32)) {
+>             std::ofstream out("/tmp/test_eval.xml");
+>             out << test_str;
+>             std::cout << "Found at len " << test_str.length() << " opt " << opt << std::endl;
+>             return 0;
+>         }
+>     }
+>     return 1;
+> }
+> EOF
+root@e38823cb2484:/# g++ -O3 -o /tmp/search5 /tmp/search5.cc
+root@e38823cb2484:/# /tmp/search5
+Found at len 20097 opt 1238937244
+root@e38823cb2484:/# /out/libxml2_xml_read_memory_fuzzer /tmp/test_eval.xml > /tmp/crash_output.txt 2>&1
+root@e38823cb2484:/# grep AddressSanitizer /tmp/crash_output.txt
+root@e38823cb2484:/# 

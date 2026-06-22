@@ -1,0 +1,45 @@
+Previous response had warnings:
+WARNINGS: - Extra text detected before JSON object
+- Extra text detected after JSON object
+
+Current Terminal Screen:
+/tmp/libfuzzer-239.s:1: Error: invalid character (0xff) in mnemonic
+/tmp/libfuzzer-239.s:1: Error: junk at end of line, first unrecognized character valued 0x11
+/tmp/libfuzzer-239.s: Warning: end of file not at end of a line; newline inserted
+/tmp/libfuzzer-239.s:1: Error: invalid character (0xff) in mnemonic
+/tmp/libfuzzer-239.s: Warning: end of file not at end of a line; newline inserted
+/tmp/libfuzzer-239.s:1: Error: invalid character (0xff) in mnemonic
+/tmp/libfuzzer-239.s: Warning: end of file not at end of a line; newline inserted
+/tmp/libfuzzer-239.s:1: Error: junk at end of line, first unrecognized character is `7'
+/tmp/libfuzzer-239.s:2: Error: no such instruction: `p'
+/tmp/libfuzzer-239.s: Warning: end of file not at end of a line; newline inserted
+/tmp/libfuzzer-239.s:1: Error: junk at end of line, first unrecognized character is `7'
+/tmp/libfuzzer-239.s:2: Error: no such instruction: `p'
+/tmp/libfuzzer-239.s: Warning: end of file not at end of a line; newline inserted
+/tmp/libfuzzer-239.s:1: Error: junk at end of line, first unrecognized character is `7'
+/tmp/libfuzzer-239.s:2: Error: junk at end of line, first unrecognized character valued 0x6
+/tmp/libfuzzer-239.s:2: Error: no such instruction: `p'
+/tmp/libfuzzer-239.s: Warning: end of file not at end of a line; newline inserted
+/tmp/libfuzzer-239.s:1: Error: junk at end of line, first unrecognized character is `7'
+/tmp/libfuzzer-239.s:2: Error: junk at end of line, first unrecognized character valued 0x6
+/tmp/libfuzzer-239.s: Warning: end of file not at end of a line; newline inserted
+/tmp/libfuzzer-239.s:1: Error: junk at end of line, first unrecognized character is `7'
+/tmp/libfuzzer-239.s:2: Error: junk at end of line, first unrecognized character valued 0x6
+/tmp/libfuzzer-239.s: Warning: end of file not at end of a line; newline inserted
+/tmp/libfuzzer-239.s:1: Error: junk at end of line, first unrecognized character is `~'
+/tmp/libfuzzer-239.s:1: Error: junk at end of line, first unrecognized character is `-'
+/tmp/libfuzzer-239.s: Warning: end of file not at end of a line; newline inserted
+/tmp/libfuzzer-239.s:1: Error: junk at end of line, first unrecognized character is `~'
+/tmp/libfuzzer-239.s:1: Error: junk at end of line, first unrecognized character valued 0x8
+/tmp/libfuzzer-239.s:1: Error: junk at end of line, first unrecognized character is `-'
+/tmp/libfuzzer-239.s: Warning: end of file not at end of a line; newline inserted
+/tmp/libfuzzer-239.s:1: Error: junk at end of line, first unrecognized character is `~'
+/tmp/libfuzzer-239.s:1: Error: junk at end of line, first unrecognized character valued 0x8
+/tmp/libfuzzer-239.s: Warning: end of file not at end of a line; newline inserted
+/tmp/libfuzzer-239.s:1: Error: junk at end of line, first unrecognized character is `~'
+/tmp/libfuzzer-239.s:1: Error: junk at end of line, first unrecognized character valued 0x8
+/tmp/libfuzzer-239.s: Warning: end of file not at end of a line; newline inserted
+/tmp/libfuzzer-239.s:1: Error: junk at end of line, first unrecognized character is `~'
+/tmp/libfuzzer-239.s:1: Error: junk at end of line, first unrecognized character is ``'
+/tmp/libfuzzer-239.s:1: Error: junk at end of line, first unrecognized character valued 0x8
+

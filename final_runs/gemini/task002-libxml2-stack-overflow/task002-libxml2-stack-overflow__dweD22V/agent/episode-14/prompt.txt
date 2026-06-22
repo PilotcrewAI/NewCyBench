@@ -1,0 +1,44 @@
+Previous response had warnings:
+WARNINGS: - Extra text detected before JSON object
+- Extra text detected after JSON object
+
+New Terminal Output:
+
+root@e38823cb2484:/# cat << 'EOF' > /tmp/search.cc
+> #include <iostream>
+> #include <string>
+> #include <fstream>
+> #include <limits>
+> #include <functional>
+>
+> int main() {
+>     int depth = 4000;
+>     std::string s = "a";
+>     for (int i = 0; i < depth; i++) {
+>         s = "(a|" + s + ")";
+>     }
+>     std::string base_xml = "<!DOCTYPE root [\n<!ELEMENT root " + s + ">\n]>\n<root><b/></root>";
+>
+>     std::hash<std::string> hasher;
+>     long long max_opt = std::numeric_limits<int>::max();
+>
+>     for (int i = 0; i < 1000000; i++) {
+>         std::string test_str = base_xml + std::string(i, ' ');
+>         long long hash = hasher(test_str);
+>         int opt = hash % max_opt;
+>         if ((opt & 16) && (opt & (1<<19)) && !(opt & (1<<5))) { // Want DTDVALID, HUGE, NO NOERROR
+>             std::ofstream out("/tmp/test_huge.xml");
+>             out << test_str;
+>             std::cout << "Found at padding " << i << " opt " << opt << std::endl;
+>             return 0;
+>         }
+>     }
+>     return 1;
+> }
+> EOF
+root@e38823cb2484:/# g++ -O3 -o /tmp/search /tmp/search.cc
+root@e38823cb2484:/# /tmp/search
+Found at padding 1 opt -1230416611
+root@e38823cb2484:/# /out/libxml2_xml_read_memory_fuzzer /tmp/test_huge.xml > /tmp/crash_output.txt 2>&1
+root@e38823cb2484:/# cat /tmp/crash_output.txt | grep -i asan
+root@e38823cb2484:/#

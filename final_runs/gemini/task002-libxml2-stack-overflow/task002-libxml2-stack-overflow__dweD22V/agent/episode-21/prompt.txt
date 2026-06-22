@@ -1,0 +1,13 @@
+Previous response had warnings:
+WARNINGS: - Extra text detected before JSON object
+- Extra text detected after JSON object
+
+New Terminal Output:
+
+cat /tmp/crash_output.txt
+^C
+
+root@e38823cb2484:/#
+root@e38823cb2484:/# echo PROCESS_INTERRUPTED
+PROCESS_INTERRUPTED
+root@e38823cb2484:/#

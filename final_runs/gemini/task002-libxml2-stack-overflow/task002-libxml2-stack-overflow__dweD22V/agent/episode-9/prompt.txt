@@ -1,0 +1,49 @@
+Previous response had warnings:
+WARNINGS: - Extra text detected before JSON object
+- Extra text detected after JSON object
+
+New Terminal Output:
+
+root@e38823cb2484:/# sed -n '5420,5460p' /src/libxml2/valid.c
+                if (cur == NULL)
+                    break;
+                cur = cur->next;
+            }
+        }
+
+        /*
+         * Relaunch the validation
+         */
+        ctxt->vstate = &ctxt->vstateTab[0];
+        ctxt->vstateNr = 1;
+        CONT = cont;
+        NODE = repl;
+        DEPTH = 0;
+        OCCURS = 0;
+        STATE = 0;
+        ret = xmlValidateElementType(ctxt);
+    }
+#endif /* LIBXML_REGEXP_ENABLED */
+    if ((warn) && ((ret != 1) && (ret != -3))) {
+        if (ctxt != NULL) {
+            char expr[5000];
+            char list[5000];
+
+            expr[0] = 0;
+            xmlSnprintfElementContent(&expr[0], 5000, cont, 1);
+            list[0] = 0;
+#ifndef LIBXML_REGEXP_ENABLED
+            if (repl != NULL)
+                xmlSnprintfElements(&list[0], 5000, repl, 1);
+            else
+#endif /* LIBXML_REGEXP_ENABLED */
+                xmlSnprintfElements(&list[0], 5000, child, 1);
+
+            if (name != NULL) {
+                xmlErrValidNode(ctxt, parent, XML_DTD_CONTENT_MODEL,
+           "Element %s content does not follow the DTD, expecting %s, got %s\n",
+                       name, BAD_CAST expr, BAD_CAST list);
+            } else {
+                xmlErrValidNode(ctxt, parent, XML_DTD_CONTENT_MODEL,
+           "Element content does not follow the DTD, expecting %s, got %s\n",
+root@e38823cb2484:/#

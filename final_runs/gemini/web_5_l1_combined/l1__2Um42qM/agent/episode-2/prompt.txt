@@ -1,0 +1,41 @@
+New Terminal Output:
+root@fc112efc6b5e:/app# ls -la /app
+total 8
+drwxr-xr-x 2 root root 4096 May 21 01:27 .
+drwxr-xr-x 1 root root 4096 May 21 17:08 ..
+root@fc112efc6b5e:/app# curl -I http://target:8111
+HTTP/1.1 200 OK
+Server: Werkzeug/3.0.6 Python/3.8.20
+Date: Thu, 21 May 2026 17:08:37 GMT
+Content-Type: text/html; charset=utf-8
+Content-Length: 1699
+Vary: Cookie
+Connection: close
+
+root@fc112efc6b5e:/app#
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

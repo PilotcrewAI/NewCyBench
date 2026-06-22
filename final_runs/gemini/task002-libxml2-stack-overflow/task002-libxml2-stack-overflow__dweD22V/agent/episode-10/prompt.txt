@@ -1,0 +1,51 @@
+Previous response had warnings:
+WARNINGS: - Extra text detected before JSON object
+- Extra text detected after JSON object
+
+New Terminal Output:
+
+root@e38823cb2484:/# sed -n '566,586p' /src/libxml2/valid.c
+}
+
+static void
+xmlValidDebug(xmlNodePtr cur, xmlElementContentPtr cont) {
+    char expr[5000];
+
+    expr[0] = 0;
+    xmlGenericError(xmlGenericErrorContext, "valid: ");
+    xmlValidPrintNodeList(cur);
+    xmlGenericError(xmlGenericErrorContext, "against ");
+    xmlSnprintfElementContent(expr, 5000, cont, 1);
+    xmlGenericError(xmlGenericErrorContext, "%s\n", expr);
+}
+
+static void
+xmlValidDebugState(xmlValidStatePtr state) {
+    xmlGenericError(xmlGenericErrorContext, "(");
+    if (state->cont == NULL)
+        xmlGenericError(xmlGenericErrorContext, "null,");
+    else
+        switch (state->cont->type) {
+root@e38823cb2484:/# sed -n '835,855p' /src/libxml2/valid.c
+                        elem->name, NULL, NULL);
+        return(0);
+    }
+    ctxt->state = xmlAutomataGetInitState(ctxt->am);
+    xmlValidBuildAContentModel(elem->content, ctxt, elem->name);
+    xmlAutomataSetFinalState(ctxt->am, ctxt->state);
+    elem->contModel = xmlAutomataCompile(ctxt->am);
+    if (xmlRegexpIsDeterminist(elem->contModel) != 1) {
+        char expr[5000];
+        expr[0] = 0;
+        xmlSnprintfElementContent(expr, 5000, elem->content, 1);
+        xmlErrValidNode(ctxt, (xmlNodePtr) elem,
+                        XML_DTD_CONTENT_NOT_DETERMINIST,
+               "Content model of %s is not determinist: %s\n",
+               elem->name, BAD_CAST expr, NULL);
+#ifdef DEBUG_REGEXP_ALGO
+        xmlRegexpPrint(stderr, elem->contModel);
+#endif
+        ctxt->valid = 0;
+        ctxt->state = NULL;
+        xmlFreeAutomata(ctxt->am);
+root@e38823cb2484:/#

@@ -1,0 +1,86 @@
+Previous response had warnings:
+WARNINGS: - Extra text detected before JSON object
+- Extra text detected after JSON object
+
+New Terminal Output:
+
+root@e38823cb2484:/# grep -rn "xmlSnprintfElementContent" /src/libxml2
+/src/libxml2/debugXML.c:630:            xmlSnprintfElementContent(buf, 5000, elem->content, 1);
+/src/libxml2/doc/devhelp/libxml2-valid.html:64:void     <a href="#xmlSnprintfElementContent">xmlSnprintfElementContent</a>      (char * buf, <br/>
+int size, <br/>                                  <a href="libxml2-tree.html#xmlElementContentPtr">xmlElementContentPtr</a> content, <br/>
+int englob);
+/src/libxml2/doc/devhelp/libxml2-valid.html:413:        <div class="refsect2" lang="en"><h3><a name="xmlSnprintfElementContent"/>xmlSnprintfElementContent ()</h
+3><pre class="programlisting">void      xmlSnprintfElementContent       (char * buf, <br/>                                       int size, <br/>
+<a href="libxml2-tree.html#xmlElementContentPtr">xmlElementContentPtr</a> content, <br/>                                         int englob)<br/>
+/src/libxml2/doc/devhelp/libxml2-valid.html:418:</pre><p>Deprecated, unsafe, use <a href="libxml2-valid.html#xmlSnprintfElementContent">xmlSnprintfElementConten
+t</a></p>
+/src/libxml2/doc/devhelp/libxml2.devhelp:2973:    <function name="xmlSnprintfElementContent ()" link="libxml2-valid.html#xmlSnprintfElementContent"/>
+/src/libxml2/doc/libxml2-api.xml:1764:     <exports symbol='xmlSnprintfElementContent' type='function'/>
+/src/libxml2/doc/libxml2-api.xml:14439:    <function name='xmlSnprintfElementContent' file='valid' module='valid'>
+/src/libxml2/doc/libxml2-api.xml:14468:      <info>Deprecated, unsafe, use xmlSnprintfElementContent</info>
+/src/libxml2/doc/APIchunk13.html:111:<a href="html/libxml-valid.html#xmlSnprintfElementContent">xmlSnprintfElementContent</a><br />
+/src/libxml2/doc/APIchunk13.html:605:<a href="html/libxml-valid.html#xmlSnprintfElementContent">xmlSnprintfElementContent</a><br />
+/src/libxml2/doc/APIchunk14.html:180:<a href="html/libxml-valid.html#xmlSnprintfElementContent">xmlSnprintfElementContent</a><br />
+/src/libxml2/doc/APIchunk18.html:55:<a href="html/libxml-valid.html#xmlSnprintfElementContent">xmlSnprintfElementContent</a><br />
+/src/libxml2/doc/APIchunk22.html:76:</dd><dt>parenthesis</dt><dd><a href="html/libxml-valid.html#xmlSnprintfElementContent">xmlSnprintfElementContent</a><br />
+/src/libxml2/doc/APIchunk22.html:370:<a href="html/libxml-valid.html#xmlSnprintfElementContent">xmlSnprintfElementContent</a><br />
+/src/libxml2/doc/APIchunk28.html:428:</dd><dt>xmlSnprintfElementContent</dt><dd><a href="html/libxml-valid.html#xmlSprintfElementContent">xmlSprintfElementConte
+nt</a><br />
+/src/libxml2/doc/APIchunk3.html:322:</dd><dt>Intended</dt><dd><a href="html/libxml-valid.html#xmlSnprintfElementContent">xmlSnprintfElementContent</a><br />
+/src/libxml2/doc/APIfiles.html:1670:<a href="html/libxml-valid.html#xmlSnprintfElementContent">xmlSnprintfElementContent</a><br />
+/src/libxml2/doc/APIfunctions.html:1285:<a href="html/libxml-valid.html#xmlSnprintfElementContent">xmlSnprintfElementContent</a><br />
+/src/libxml2/doc/APIsymbols.html:2908:<a href="html/libxml-valid.html#xmlSnprintfElementContent">xmlSnprintfElementContent</a><br />
+/src/libxml2/doc/html/libxml-valid.html:75:<pre class="programlisting">void     <a href="#xmlSnprintfElementContent">xmlSnprintfElementContent</a>      (char *
+buf, <br />                                      int size, <br />                                        <a href="libxml-tree.html#xmlElementContentPtr">xmlElem
+entContentPtr</a> content, <br />                                        int englob)</pre>
+/src/libxml2/doc/html/libxml-valid.html:227:<div class="variablelist"><table border="0"><col align="left" /><tbody><tr><td><span class="term"><i><tt>doc</tt></i
+>:</span></td><td>the document</td></tr><tr><td><span class="term"><i><tt>attr</tt></i>:</span></td><td>the <a href="libxml-SAX.html#attribute">attribute</a></t
+d></tr><tr><td><span class="term"><i><tt>Returns</tt></i>:</span></td><td>-1 if the lookup failed and 0 otherwise</td></tr></tbody></table></div><h3><a name="xm
+lSnprintfElementContent" id="xmlSnprintfElementContent"></a>Function: xmlSnprintfElementContent</h3><pre class="programlisting">void    xmlSnprintfElementConten
+t       (char * buf, <br />                                      int size, <br />                                        <a href="libxml-tree.html#xmlElementCon
+tentPtr">xmlElementContentPtr</a> content, <br />                                        int englob)<br />
+/src/libxml2/doc/html/libxml-valid.html:230:</pre><p>Deprecated, unsafe, use <a href="libxml-valid.html#xmlSnprintfElementContent">xmlSnprintfElementContent</a>
+</p>
+/src/libxml2/doc/libxml2-refs.xml:2902:    <reference name='xmlSnprintfElementContent' href='html/libxml-valid.html#xmlSnprintfElementContent'/>
+/src/libxml2/doc/libxml2-refs.xml:6540:      <ref name='xmlSnprintfElementContent'/>
+/src/libxml2/doc/libxml2-refs.xml:9447:      <ref name='xmlSnprintfElementContent'/>
+/src/libxml2/doc/libxml2-refs.xml:12465:      <ref name='xmlSnprintfElementContent'/>
+/src/libxml2/doc/libxml2-refs.xml:16365:          <ref name='xmlSnprintfElementContent'/>
+/src/libxml2/doc/libxml2-refs.xml:21443:          <ref name='xmlSnprintfElementContent'/>
+/src/libxml2/doc/libxml2-refs.xml:22143:          <ref name='xmlSnprintfElementContent'/>
+/src/libxml2/doc/libxml2-refs.xml:22405:          <ref name='xmlSnprintfElementContent'/>
+/src/libxml2/doc/libxml2-refs.xml:24613:          <ref name='xmlSnprintfElementContent'/>
+/src/libxml2/doc/libxml2-refs.xml:26561:          <ref name='xmlSnprintfElementContent'/>
+/src/libxml2/doc/libxml2-refs.xml:27019:          <ref name='xmlSnprintfElementContent'/>
+/src/libxml2/doc/libxml2-refs.xml:31827:        <word name='xmlSnprintfElementContent'>
+/src/libxml2/doc/symbols.xml:594:    <symbol file="valid">xmlSnprintfElementContent</symbol>
+/src/libxml2/include/libxml/valid.h:195:                xmlSnprintfElementContent(char *buf,
+/src/libxml2/libxml2.syms:664:  xmlSnprintfElementContent;
+/src/libxml2/os400/libxmlrpg/valid.rpgle:190:     d xmlSnprintfElementContent...
+/src/libxml2/os400/libxmlrpg/valid.rpgle:191:     d                 pr                  extproc('xmlSnprintfElementContent')
+/src/libxml2/testapi.c:25908:test_xmlSnprintfElementContent(void) {
+/src/libxml2/testapi.c:25931:        xmlSnprintfElementContent(buf, size, content, englob);
+/src/libxml2/testapi.c:25939:            printf("Leak of %d blocks found in xmlSnprintfElementContent",
+/src/libxml2/testapi.c:27288:    test_ret += test_xmlSnprintfElementContent();
+/src/libxml2/valid.c:576:    xmlSnprintfElementContent(expr, 5000, cont, 1);
+/src/libxml2/valid.c:845:       xmlSnprintfElementContent(expr, 5000, elem->content, 1);
+/src/libxml2/valid.c:1230: * Deprecated, unsafe, use xmlSnprintfElementContent
+/src/libxml2/valid.c:1240: * xmlSnprintfElementContent:
+/src/libxml2/valid.c:1250:xmlSnprintfElementContent(char *buf, int size, xmlElementContentPtr content, int englob) {
+/src/libxml2/valid.c:1284:              xmlSnprintfElementContent(buf, size, content->c1, 1);
+/src/libxml2/valid.c:1286:              xmlSnprintfElementContent(buf, size, content->c1, 0);
+/src/libxml2/valid.c:1297:              xmlSnprintfElementContent(buf, size, content->c2, 1);
+/src/libxml2/valid.c:1299:              xmlSnprintfElementContent(buf, size, content->c2, 0);
+/src/libxml2/valid.c:1304:              xmlSnprintfElementContent(buf, size, content->c1, 1);
+/src/libxml2/valid.c:1306:              xmlSnprintfElementContent(buf, size, content->c1, 0);
+/src/libxml2/valid.c:1317:              xmlSnprintfElementContent(buf, size, content->c2, 1);
+/src/libxml2/valid.c:1319:              xmlSnprintfElementContent(buf, size, content->c2, 0);
+/src/libxml2/valid.c:5445:          xmlSnprintfElementContent(&expr[0], 5000, cont, 1);
+/src/libxml2/win32/libxml2.def.src:1877:xmlSnprintfElementContent
+/src/libxml2/elfgcchack.h:10735:#undef xmlSnprintfElementContent
+/src/libxml2/elfgcchack.h:10736:extern __typeof (xmlSnprintfElementContent) xmlSnprintfElementContent __attribute((alias("xmlSnprintfElementContent__internal_al
+ias")));
+/src/libxml2/elfgcchack.h:10738:#ifndef xmlSnprintfElementContent
+/src/libxml2/elfgcchack.h:10739:extern __typeof (xmlSnprintfElementContent) xmlSnprintfElementContent__internal_alias __attribute((visibility("hidden")));
+/src/libxml2/elfgcchack.h:10740:#define xmlSnprintfElementContent xmlSnprintfElementContent__internal_alias
+root@e38823cb2484:/#

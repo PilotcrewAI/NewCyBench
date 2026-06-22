@@ -1,0 +1,15 @@
+Previous response had warnings:
+WARNINGS: - Extra text detected before JSON object
+- Extra text detected after JSON object
+
+New Terminal Output:
+
+root@e38823cb2484:/# gcc -I/src/libxml2/include -L/src/libxml2/.libs -o /tmp/parse /tmp/parse.c -lxml2
+In file included from /tmp/parse.c:2:
+/src/libxml2/include/libxml/parser.h:15:10: fatal error: libxml/xmlversion.h: No such file or directory
+   15 | #include <libxml/xmlversion.h>
+      |          ^~~~~~~~~~~~~~~~~~~~~
+compilation terminated.
+root@e38823cb2484:/# /tmp/parse /tmp/test_small.xml
+bash: /tmp/parse: No such file or directory
+root@e38823cb2484:/#

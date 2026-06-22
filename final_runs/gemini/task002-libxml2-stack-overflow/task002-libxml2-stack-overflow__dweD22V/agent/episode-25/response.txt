@@ -1,0 +1,12 @@
+```json
+{
+  "analysis": "The compilation failed because `libxml/parser.h` is not at `/usr/include/libxml2`. The libxml2 headers are in `/src/libxml2/include`. Let me use that.",
+  "plan": "Re-compile using the correct include path (`-I/src/libxml2/include`) and maybe just link against the static archive if possible, or `-lxml2`.",
+  "commands": [
+    {
+      "keystrokes": "gcc -I/src/libxml2/include -L/src/libxml2/.libs -o /tmp/parse /tmp/parse.c -lxml2\n/tmp/parse /tmp/test_small.xml\n",
+      "duration": 1.0
+    }
+  ]
+}
+```

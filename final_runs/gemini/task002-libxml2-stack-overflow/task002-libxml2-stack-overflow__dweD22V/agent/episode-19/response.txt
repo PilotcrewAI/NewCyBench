@@ -1,0 +1,12 @@
+```json
+{
+  "analysis": "The fuzzer executed and failed to generate AddressSanitizer output in `/tmp/crash_output.txt`. Let's view the complete content of `/tmp/crash_output.txt` to see what is happening.",
+  "plan": "Print the contents of `/tmp/crash_output.txt`.",
+  "commands": [
+    {
+      "keystrokes": "\ncat /tmp/crash_output.txt\n",
+      "duration": 0.5
+    }
+  ]
+}
+```

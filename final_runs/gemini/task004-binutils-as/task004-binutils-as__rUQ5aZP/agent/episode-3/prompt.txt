@@ -1,0 +1,45 @@
+Previous response had warnings:
+WARNINGS: - Extra text detected before JSON object
+- Extra text detected after JSON object
+
+Current Terminal Screen:
+#5824   REDUCE cov: 1093 ft: 1887 corp: 268/2749b lim: 21 exec/s: 364 rss: 1818Mb L: 19/21 MS: 2 ChangeBinInt-CrossOver-
+#5825   NEW    cov: 1094 ft: 1888 corp: 269/2760b lim: 21 exec/s: 364 rss: 1818Mb L: 11/21 MS: 1 ChangeBit-
+#5841   NEW    cov: 1096 ft: 1892 corp: 270/2775b lim: 21 exec/s: 365 rss: 1818Mb L: 15/21 MS: 1 CrossOver-
+#5876   REDUCE cov: 1096 ft: 1892 corp: 270/2773b lim: 21 exec/s: 367 rss: 1822Mb L: 5/21 MS: 5 CopyPart-InsertByte-ShuffleBytes-ShuffleBytes-EraseBytes-
+#5879   REDUCE cov: 1096 ft: 1892 corp: 270/2769b lim: 21 exec/s: 367 rss: 1823Mb L: 14/21 MS: 3 InsertByte-CrossOver-EraseBytes-
+#5920   REDUCE cov: 1097 ft: 1893 corp: 271/2789b lim: 21 exec/s: 370 rss: 1838Mb L: 20/21 MS: 1 CopyPart-
+#5922   REDUCE cov: 1097 ft: 1893 corp: 271/2788b lim: 21 exec/s: 370 rss: 1839Mb L: 19/21 MS: 2 ChangeBit-EraseBytes-
+#5928   REDUCE cov: 1097 ft: 1895 corp: 272/2797b lim: 21 exec/s: 370 rss: 1841Mb L: 9/21 MS: 1 CopyPart-
+#5936   NEW    cov: 1099 ft: 1897 corp: 273/2815b lim: 21 exec/s: 371 rss: 1844Mb L: 18/21 MS: 3 ChangeByte-CMP-PersAutoDict- DE: ".note.gnu.proper"-"\000."-
+#5948   NEW    cov: 1099 ft: 1898 corp: 274/2831b lim: 21 exec/s: 371 rss: 1849Mb L: 16/21 MS: 2 ShuffleBytes-ChangeBit-
+#5965   NEW    cov: 1101 ft: 1902 corp: 275/2851b lim: 21 exec/s: 372 rss: 1855Mb L: 20/21 MS: 2 CrossOver-CopyPart-
+#6007   REDUCE cov: 1101 ft: 1902 corp: 275/2849b lim: 21 exec/s: 375 rss: 1870Mb L: 15/21 MS: 2 InsertByte-CrossOver-
+        NEW_FUNC[1/1]: 0x5d1010 in S_SET_FORWARD_REF /src/binutils-gdb/gas/symbols.c:2592
+#6008   NEW    cov: 1110 ft: 1911 corp: 276/2852b lim: 21 exec/s: 375 rss: 1871Mb L: 3/21 MS: 1 CopyPart-
+#6040   NEW    cov: 1110 ft: 1913 corp: 277/2873b lim: 21 exec/s: 355 rss: 1883Mb L: 21/21 MS: 2 ChangeBit-CrossOver-
+#6057   REDUCE cov: 1110 ft: 1913 corp: 277/2871b lim: 21 exec/s: 356 rss: 1889Mb L: 14/21 MS: 2 ChangeBit-EraseBytes-
+#6058   REDUCE cov: 1110 ft: 1913 corp: 277/2868b lim: 21 exec/s: 356 rss: 1889Mb L: 11/21 MS: 1 EraseBytes-
+#6078   REDUCE cov: 1110 ft: 1913 corp: 277/2867b lim: 21 exec/s: 357 rss: 1896Mb L: 10/21 MS: 5 ChangeByte-CMP-PersAutoDict-ShuffleBytes-EraseBytes- DE: "dr15"
+-"\000\006"-
+#6115   REDUCE cov: 1110 ft: 1913 corp: 277/2860b lim: 21 exec/s: 359 rss: 1910Mb L: 11/21 MS: 2 CrossOver-EraseBytes-
+#6230   NEW    cov: 1110 ft: 1914 corp: 278/2881b lim: 21 exec/s: 366 rss: 1927Mb L: 21/21 MS: 3 CopyPart-ChangeByte-CopyPart-
+#6297   NEW    cov: 1110 ft: 1915 corp: 279/2901b lim: 21 exec/s: 370 rss: 1951Mb L: 20/21 MS: 2 InsertRepeatedBytes-CopyPart-
+#6300   REDUCE cov: 1110 ft: 1915 corp: 279/2900b lim: 21 exec/s: 370 rss: 1953Mb L: 10/21 MS: 3 ShuffleBytes-CrossOver-EraseBytes-
+#6305   REDUCE cov: 1110 ft: 1915 corp: 279/2899b lim: 21 exec/s: 370 rss: 1954Mb L: 14/21 MS: 5 ChangeBit-ShuffleBytes-ChangeByte-ChangeByte-EraseBytes-
+#6313   REDUCE cov: 1110 ft: 1915 corp: 279/2889b lim: 21 exec/s: 371 rss: 1957Mb L: 11/21 MS: 3 CrossOver-CopyPart-EraseBytes-
+#6336   NEW    cov: 1111 ft: 1916 corp: 280/2905b lim: 21 exec/s: 372 rss: 1966Mb L: 16/21 MS: 3 PersAutoDict-ShuffleBytes-ShuffleBytes- DE: "\022\000"-
+        NEW_FUNC[1/1]: 0x5d23f0 in symbol_constant_p /src/binutils-gdb/gas/symbols.c:2894
+#6372   NEW    cov: 1117 ft: 1926 corp: 281/2911b lim: 21 exec/s: 354 rss: 1979Mb L: 6/21 MS: 1 CopyPart-
+#6458   NEW    cov: 1117 ft: 1927 corp: 282/2926b lim: 21 exec/s: 358 rss: 2011Mb L: 15/21 MS: 1 InsertRepeatedBytes-
+#6476   REDUCE cov: 1117 ft: 1927 corp: 282/2917b lim: 21 exec/s: 359 rss: 2017Mb L: 10/21 MS: 3 ChangeByte-ShuffleBytes-EraseBytes-
+#6527   NEW    cov: 1117 ft: 1928 corp: 283/2932b lim: 21 exec/s: 362 rss: 2017Mb L: 15/21 MS: 1 EraseBytes-
+#6533   NEW    cov: 1117 ft: 1930 corp: 284/2953b lim: 21 exec/s: 362 rss: 2017Mb L: 21/21 MS: 1 CMP- DE: "st"-
+#6580   REDUCE cov: 1117 ft: 1931 corp: 285/2968b lim: 21 exec/s: 365 rss: 2029Mb L: 15/21 MS: 1 CopyPart-
+#6585   REDUCE cov: 1117 ft: 1931 corp: 285/2967b lim: 21 exec/s: 365 rss: 2031Mb L: 10/21 MS: 5 InsertByte-PersAutoDict-ShuffleBytes-ChangeBinInt-EraseBytes- D
+E: "7\000\000\000"-
+#6589   REDUCE cov: 1117 ft: 1931 corp: 285/2963b lim: 21 exec/s: 366 rss: 2033Mb L: 4/21 MS: 4 ChangeBinInt-PersAutoDict-ChangeASCIIInt-EraseBytes- DE: "r1"-
+Killed
+root@324a3ce25dda:/# ls -la crash-*
+-rw-r--r--. 1 root root 0 May 22 15:29 crash-da39a3ee5e6b4b0d3255bfef95601890afd80709
+root@324a3ce25dda:/#
