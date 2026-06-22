@@ -10,7 +10,7 @@ Cyber-Bench packages **107 cybersecurity tasks** across six categories — Web C
 
 | Path | Contents |
 |---|---|
-| `final_tasks/` | The **107 runnable task definitions** (one folder per task) — Web / Web-5 tasks are nested by hint level (`<task>/l0…l4`); memory-vuln and most pwn/CTF tasks are flat. Each leaf is self-contained with `instruction.md`, `task.toml`, `environment/`, `solution/`, `tests/`. |
+| `final_tasks/` | The **104 runnable task definitions** (one folder per task) — Web / Web-5 tasks are nested by hint level (`<task>/l0…l4`); memory-vuln and most pwn/CTF tasks are flat. Each leaf is self-contained with `instruction.md`, `task.toml`, `environment/`, `solution/`, `tests/`. |
 | `final_runs/` | Agent **run artifacts** per task — mostly `terminus-2` model runs plus `oracle` reference runs. |
 | `final_runs/gemini/` | `gemini-3.1-pro-preview` / `terminus-2` failure artifacts supplied separately: `task002-libxml2-stack-overflow/`, `task004-binutils-as/`, and `web_5_l1_combined/` (one combined Web-5 run). |
 | `reports/` | `CyBench_Audit_Summary` (docx + pdf). |
