@@ -2,7 +2,7 @@
 
 **Vendor:** PilotCrew AI &nbsp;•&nbsp; **Domain:** Web Security / CTF / Memory-Vulnerability &nbsp;•&nbsp; **Format:** Cyber-Bench, packaged as Harbor / Terminal-Bench task directories.
 
-Cyber-Bench packages **104 cybersecurity tasks** across six categories — Web CTF, Web-5 combined, Memory Vulnerability, Binary Exploitation, Reverse Engineering, and Cryptographic Attack — as self-contained Harbor / Terminal-Bench task directories, runs frontier coding agents against them, and scores submitted flags. This repo holds the **task packages**, the **agent run artifacts**, and a **headroom analysis** of where **`gemini-3.1-pro-preview`** (agent harness **`terminus-2`**) still fails.
+Cyber-Bench packages **100 cybersecurity tasks** across six categories — Web CTF, Web-5 combined, Memory Vulnerability, Binary Exploitation, Reverse Engineering, and Cryptographic Attack — as self-contained Harbor / Terminal-Bench task directories, runs frontier coding agents against them, and scores submitted flags. This repo holds the **task packages**, the **agent run artifacts**, and a **headroom analysis** of where **`gemini-3.1-pro-preview`** (agent harness **`terminus-2`**) still fails.
 
 ---
 
@@ -10,7 +10,7 @@ Cyber-Bench packages **104 cybersecurity tasks** across six categories — Web C
 
 | Path | Contents |
 |---|---|
-| `final_tasks/` | The **104 runnable task definitions** (one folder per task)
+| `final_tasks/` | The **100 runnable task definitions** (one folder per task)
 | `final_runs/` | Agent **run artifacts** per task — mostly `terminus-2` model runs plus `oracle` reference runs. |
 | `final_runs/gemini/` | `gemini-3.1-pro-preview` / `terminus-2` failure artifacts supplied separately: `task002-libxml2-stack-overflow/`, `task004-binutils-as/`, and `web_5_l1_combined/` (one combined Web-5 run). |
 | `REPORT.pdf` | The reference benchmark report — methodology, per-model results, per-task failure analysis. |
